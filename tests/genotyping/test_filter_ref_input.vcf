@@ -1,0 +1,38 @@
+##fileformat=VCFv4.3
+##fileDate=20190207
+##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">
+##INFO=<ID=END,Number=.,Type=Integer,Description="End position of the variant described in this region">
+##INFO=<ID=INSCHROM,Number=.,Type=String,Description="Chromosome on which insertion site of the dispersed duplication is located">
+##INFO=<ID=INSPOS,Number=.,Type=Integer,Description="Position of insertion site of the dispersed duplication">
+##ALT=<ID=DEL,Description="Deletion">
+##ALT=<ID=DUP:DISPERSED,Description="Dispersed Duplication">
+##ALT=<ID=DUP:TANDEM,Description="Tandem Duplication">
+##ALT=<ID=INS,Description="Insertion of novel sequence">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=SUP,Number=1,Type=Float,Description="Median number of supporting reads">
+##FORMAT=<ID=RP,Number=1,Type=Float,Description="Median number of supporting discordantly aligned read pairs">
+##FORMAT=<ID=SR,Number=1,Type=Float,Description="Median number of supporting split reads">
+##FORMAT=<ID=TOOL,Number=.,Type=String,Description="Supporting tools">
+##FORMAT=<ID=RQ,Number=1,Type=Float,Description="Probabilistic score of random forest model">
+##FORMAT=<ID=DHFC,Number=1,Type=Float,Description="duphold depth fold-change">
+##FORMAT=<ID=DHBFC,Number=1,Type=Float,Description="duphold depth fold-change compared to bins with matching GC">
+##FORMAT=<ID=DHFFC,Number=1,Type=Float,Description="duphold depth flank fold-change compared to 1000bp left and right of event">
+##contig=<ID=1,length=30427671>
+##contig=<ID=2,length=19698289>
+##contig=<ID=3,length=23459830>
+##contig=<ID=4,length=18585056>
+##contig=<ID=5,length=26975502>
+##contig=<ID=Mt,length=367808>
+##contig=<ID=Pt,length=154478>
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	1098	2098
+1	43994	1	N	<DEL>	-1	PASS	SVTYPE=DEL;END=45232	GT:SUP:RP:SR:TOOL:RQ:DHFC:DHBFC:DHFFC	0/0:0:0:0:.:0:-1:-1:-1	1/1:18.0:0.0:18.0:DELLY,LUMPY,MANTA,GRIDSS:0.9:0.0:0.0:0.0
+1	44995	2	N	<DEL>	-1	PASS	SVTYPE=DEL;END=45231	GT:SUP:RP:SR:TOOL:RQ:DHFC:DHBFC:DHFFC	./0:17.0:0.0:17.0:DELLY,LUMPY,MANTA,GRIDSS:0.86:0.0:0.0:0.0	0/0:0:0:0:.:0:-1:-1:-1
+1	75823	3	N	<DEL>	-1	PASS	SVTYPE=DEL;END=77562	GT:SUP:RP:SR:TOOL:RQ:DHFC:DHBFC:DHFFC	0/0:0:0:0:.:0:-1:-1:-1	0/1:26.5:15.0:11.5:DELLY,LUMPY,MANTA,GRIDSS:0.81:0.5:0.5:0.5
+1	76823	4	N	<DEL>	-1	PASS	SVTYPE=DEL;END=77560	GT:SUP:RP:SR:TOOL:RQ:DHFC:DHBFC:DHFFC	0/0:26.5:15.0:11.5:DELLY,LUMPY,MANTA,GRIDSS:0.81:0.25:0.25:0.25	0/0:0:0:0:.:0:-1:-1:-1
+1	484431	5	N	<DUP>	-1	PASS	SVTYPE=DUP:TANDEM;END=585498	GT:SUP:RP:SR:TOOL:RQ:DHFC:DHBFC:DHFFC	0/1:14.0:0.0:14.0:GRIDSS:0.76:1.25:1.25:1.25	0/1:14.0:0.0:14.0:GRIDSS:0.76:1.5:1.5:1.5
+1	4618775	6	N	NCTTACAGTATAATCCAAGGCATGTATATATATCTTTCTTAGAGTTTTTTTTTTTTTTTGAACACACTCTTT	-1	PASS	SVTYPE=INS	GT:SUP:RP:SR:TOOL:RQ:DHFC:DHBFC:DHFFC	./1:10.0:0.0:10.0:DELLY:0.71:0.9090909957885742:0.9090909957885742:1.111109972000122	0/0:0:0:0:.:0:-1:-1:-1
+1	4618785	7	N	NCTTACAGTATAATCCAAGGCATGTATATATATCTTTCTTAGAGTTTTTTTTTTTTTTTGAACACACTCT	-1	PASS	SVTYPE=INS	GT:SUP:RP:SR:TOOL:RQ:DHFC:DHBFC:DHFFC	0/0:0:0:0:.:0:-1:-1:-1	./1:11.0:0.0:11.0:DELLY:0.72:0.9090909957885742:0.9090909957885742:1.111109972000122
+1	4618785	8	N	NCTTACAGTATAATCCAAGGCATGTATATATATCTTTCTTAGAGTTTTTTTTTTTTTTTGAACACACTCTTT	-1	PASS	SVTYPE=INS	GT:SUP:RP:SR:TOOL:RQ:DHFC:DHBFC:DHFFC	0/0:0:0:0:.:0:-1:-1:-1	./1:10.0:0.0:10.0:DELLY:0.71:0.9090909957885742:0.9090909957885742:1.111109972000122
+1	6134670	9	N	<DUP>	-1	PASS	SVTYPE=DUP:DISPERSED;END=6134722;INSCHROM=1;INSPOS=6134669	GT:SUP:RP:SR:TOOL:RQ:DHFC:DHBFC:DHFFC	0/1:0.0:0.0:0.0:GRIDSS:0.8:1.5:1.5:1.5	0/1:0.0:0.0:0.0:GRIDSS:0.8:1.5:1.5:1.5
+1	6134670	10	N	<DUP>	-1	PASS	SVTYPE=DUP:DISPERSED;END=6134722;INSCHROM=2;INSPOS=6134669	GT:SUP:RP:SR:TOOL:RQ:DHFC:DHBFC:DHFFC	./.:0:0:0:.:0:-1:-1:-1	./.:0.0:0.0:0.0:GRIDSS:0.7:2.0:2.0:2.0
+2	9057242	11	N	<DEL>	-1	PASS	SVTYPE=DEL;END=9059624	GT:SUP:RP:SR:TOOL:RQ:DHFC:DHBFC:DHFFC	0/0:23.0:12.0:11.0:DELLY,LUMPY,MANTA,GRIDSS:0.83:2.0:2.0:2.0	1/1:23.0:12.0:11.0:DELLY,LUMPY,MANTA,GRIDSS:0.83:0.0:0.0:0.0

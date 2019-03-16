@@ -1,0 +1,30 @@
+# This file can be used to create a conda environment for this pipeline:
+# conda env create -f environment.yml
+name: hecaton_py3
+channels:
+  - bioconda
+  - conda-forge
+  - r
+  - defaults
+dependencies:
+  # python
+  - python=3.6
+  # R
+  - r=3.5.1
+  # utils
+  - bedtools=2.27.1
+  - biopython=1.72
+  - gawk=4.2.1
+  - intervaltree=3.0.2
+  - numpy=1.14.2
+  - pandas=0.23.4
+  - pysam=0.14.1
+  - scipy=1.0.0 
+  - xopen=0.3.2
+  # cnv calling
+  - delly=0.7.8
+  - duphold=0.1.1
+  # machine-learning
+  - scikit-learn=0.19.1 
+  
+  

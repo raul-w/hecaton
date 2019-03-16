@@ -1,0 +1,2 @@
+../tests/genotyping/test_hecaton_vcf_1.vcf.gz
+../tests/genotyping/test_hecaton_vcf_2.vcf.gz
