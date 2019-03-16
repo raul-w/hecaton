@@ -10,6 +10,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial release of Hecaton
 
-[Unreleased]: https://git.wur.nl/bioinformatics/hecaton/tags/v0.1.0...master
+[Unreleased]: https://git.wur.nl/bioinformatics/hecaton/compare/v0.1.0...master
 [0.1.0]: https://git.wur.nl/bioinformatics/hecaton/tags/v0.1.0
 
