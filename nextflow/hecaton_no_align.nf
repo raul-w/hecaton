@@ -8,7 +8,7 @@
  */
 
 params.genome_file = ""
-params.reads = "prefix_{1,2}.fastq"
+params.bwa_bams = "*.bam"
 params.model_file = ""
 params.cutoff = 0.7
 params.extra_filtering = false
@@ -26,11 +26,11 @@ def helpMessage() {
      Hecaton v0.2.0
     =========================================
     Usage:
-    nextflow run hecaton --genome_file reference.fa --reads "prefix_{1,2}.fastq" --manta_config configManta_weight_1.py.ini --model_file model_file.pkl --output_dir results
+    nextflow run hecaton --genome_file reference.fa --bwa_bams "*.bam" --manta_config configManta_weight_1.py.ini --model_file model_file.pkl --output_dir results
 
     Mandatory arguments:
     --genome_file: Reference genome (processed by preprocess.sh) in FASTA format
-    --reads: Glob pattern specifying the location of a set of paired-end reads in FASTQ format. Gzipped FASTQ files are allowed
+    --bwa_bams: Glob pattern specifying the location of a set of BWA mem alignments in BAM format. The files need to be indexed.
     --manta_config: Config file that will be passed to the Manta tool. Can be found in the "docker" directory of the Hecaton repository
     --model_files: Random forest model that will be used to filter reads. Models can be found in the "models" directory of the Hecaton repository
     --output_dir: Output directory to which all results will be written
@@ -60,69 +60,33 @@ if (! params.output_dir ) {
     println "Missing output directory parameter"
     exit 1
 }
-if (! params.reads ) {
-    println "Missing reads parameter"
+if (! params.bwa_bams ) {
+    println "Missing bwa bams parameter"
     exit 1
 }
 if (! params.genome_file ) {
     println "Missing genome file parameter"
     exit 1
 }
-read_files = Channel.fromFilePairs(params.reads)
+bwa_bams = Channel.fromPath(params.bwa_bams)
+			     .map { file -> tuple(getSampleId(file), file, file + ".bai")}
+			     .groupTuple()
+
+def getSampleId(file) {
+	file.getBaseName()
+}
+
 genome_file = file(params.genome_file)
 genome_index_file = file(params.genome_file + ".fai")
-genome_bwa_amb_file = file(params.genome_file + ".amb")
-genome_bwa_ann_file = file(params.genome_file + ".ann")
-genome_bwa_bwt_file = file(params.genome_file + ".bwt")
-genome_bwa_pac_file = file(params.genome_file + ".pac")
-genome_bwa_sa_file = file(params.genome_file + ".sa")
 genome_N_file = file(params.genome_file + ".N.bed")
 genome_bed = file(params.genome_file + ".genome")
-manta_config_file = file(params.manta_config)
 model_file = file(params.model_file)
-
-/*
- * Align reads to reference genome using speedseq
- */
-
-process align_reads {
-	label "bwa" 
-	publishDir "${params.output_dir}/aligned_reads", mode: 'copy'
-	tag "Aligning reads with bwa mem: ${reads[0]} ${reads[1]}"
-
-	input:
-	set val(prefix), file(reads) from read_files
-	file genome_file
-	file genome_bwa_amb_file
-	file genome_bwa_ann_file
-	file genome_bwa_bwt_file
-	file genome_bwa_pac_file
-	file genome_bwa_sa_file
-
-	output:
-	set val(prefix), file("${prefix}.bam") into bwa_bams
-	set val(prefix), file("${prefix}.bam.bai") into bwa_bam_indices 
-	set val(prefix), file("${prefix}.discordants.bam") into bwa_discordants_bams
-	set val(prefix), file("${prefix}.discordants.bam.bai") into bwa_discordants_bam_indices
-	set val(prefix), file("${prefix}.splitters.bam") into bwa_splitters_bams
-	set val(prefix), file("${prefix}.splitters.bam.bai") into bwa_splitters_bam_indices
-
-	script:
-	"""
-	source activate hecaton_py3
-	speedseq align -t ${task.cpus} -o ${prefix} -R \"@RG\tID:${prefix}\tSM:${prefix}\tLB:${prefix}\" \
-	${genome_file} ${reads[0]} ${reads[1]}
-	source deactivate
-	"""
-}
 
 /*
  * Create channels for all callers
  */
 
 bwa_bams.into{delly_bams; gridss_bams; lumpy_bams; manta_bams; duphold_bams}
-bwa_bam_indices.into{delly_bam_indices; gridss_bam_indices; lumpy_bam_indices; manta_bam_indices; duphold_bam_indices}
-
 
 /*
  * Call CNVs with LUMPY
@@ -134,15 +98,7 @@ process call_lumpy {
 	tag "LUMPY calling: ${prefix}"
 
 	input:
-	set val(prefix), file(alignment_file) from lumpy_bams
-	set val(prefix_index), file(alignment_file_index) from lumpy_bam_indices
-	set val(discordants_prefix), file(discordants_alignment_file) from bwa_discordants_bams
-	set val(discordants_prefix_index), file(discordants_alignment_file_index) from bwa_discordants_bam_indices
-	set val(splitters_prefix), file(splitters_alignment_file) from bwa_splitters_bams
-	set val(splitters_prefix_index), file(splitters_alignment_file_index) from bwa_splitters_bam_indices
-	file genome_file
-	file genome_index_file
-	file genome_N_file
+	set val(prefix), file(alignment_file), file(alignment_file_index) from lumpy_bams
 
 	output:
 	file "${prefix}.sv.vcf.gz"
@@ -158,8 +114,6 @@ process call_lumpy {
 	speedseq sv -t ${task.cpus} -o ${prefix} \
 	-x ${genome_N_file} \
 	-B ${alignment_file} \
-	-D ${discordants_alignment_file} \
-	-S ${splitters_alignment_file} \
 	-R ${genome_file} \
 	-m ${task.cpus} &&
 	vcf_to_bedpe.py -i ${prefix}.sv.vcf.gz \
@@ -186,10 +140,7 @@ process call_delly {
 	tag "DELLY calling: ${prefix}"
 
 	input:
-	set val(prefix), file(alignment_file) from delly_bams
-	set val(prefix_index), file(alignment_file_index) from delly_bam_indices
-	file genome_file
-	file genome_index_file
+	set val(prefix), file(alignment_file), file(alignment_file_index) from delly_bams
 
 	output:
 	file "${prefix}_delly_cnvs.vcf.gz"
@@ -232,15 +183,7 @@ process call_gridss {
 	tag "GRIDSS calling: ${prefix}"
 
 	input:
-	set val(prefix), file(alignment_file) from gridss_bams
-	set val(prefix_index), file(alignment_file_index) from gridss_bam_indices
-	file genome_file
-	file genome_index_file
-	file genome_bwa_amb_file
-	file genome_bwa_ann_file
-	file genome_bwa_bwt_file
-	file genome_bwa_pac_file
-	file genome_bwa_sa_file
+	set val(prefix), file(alignment_file), file(alignment_file_index) from gridss_bams
 
 	output:
 	file "${prefix}.sv.vcf"
@@ -288,10 +231,7 @@ process call_manta {
 	tag "Manta calling: ${prefix}"
 
 	input:
-	set val(prefix), file(alignment_file) from manta_bams
-	set val(prefix_index), file(alignment_file_index) from manta_bam_indices
-	file genome_file
-	file genome_index_file
+	set val(prefix), file(alignment_file), file(alignment_file_index) from manta_bams
 
 	output:
 	file "${prefix}_tumorSV.vcf.gz"
@@ -312,8 +252,6 @@ process call_manta {
 	mv results/variants/tumorSV.vcf.gz ../${prefix}_tumorSV.vcf.gz &&
 	mv results/variants/tumorSV.vcf.gz.tbi ../${prefix}_tumorSV.vcf.gz.tbi &&
 	cd .. &&
-	source deactivate
-	source activate hecaton_py3
 	vcf_to_bedpe.py -i ${prefix}_tumorSV.vcf.gz \
 	-o ${prefix}.bedpe -t Manta &&
 	process_simple_cnvs.py -i ${prefix}_tumorSV.vcf.gz \
@@ -405,7 +343,6 @@ process apply_random_forest {
 	input:
 	set val(prefix), file(insertion_file) from insertion_feature_files
 	set val(prefix), file(non_insertion_file) from non_insertion_feature_files
-	file model_file
 
 	output:
 	set val(prefix), file("${prefix}_probabilities_unfiltered.bedpe") into probability_files
@@ -454,7 +391,7 @@ process filter_calls_cutoff {
 	"""
 }
 
-joined_duphold_bams = score_files.join(duphold_bams).join(duphold_bam_indices)
+joined_duphold_bams = score_files.join(duphold_bams)
 
 /*
  * Filter calls according to median depth
@@ -466,8 +403,6 @@ process filter_calls_median_depth {
 
 	input:
 	set val(prefix), file(probability_file), file(alignment_file), file(alignment_file_index) from joined_duphold_bams
-	file genome_file
-	file genome_index_file
 
 	output:
 	set val(prefix), file("${prefix}_probabilities_filtered_cutoff_${params.cutoff}_depth.bedpe") into depth_files
@@ -509,7 +444,6 @@ process filter_calls_flanking_Ns {
 
 	input:
 	set val(prefix), file(probability_file) from depth_files
-	file genome_bed
 
 	output:
 	set val(prefix), file("${prefix}_probabilities_filtered_cutoff_${params.cutoff}_depth_flanking_Ns.bedpe") into flank_files
@@ -536,8 +470,7 @@ process filter_calls_flanking_Ns {
 	filter_calls_by_query.py \
 	-i ${prefix}_probabilities_flanking_Ns.bedpe \
 	-q \"Flanking_Ns < 0.1\" \
-	-o ${prefix}_probabilities_filtered_cutoff_${params.cutoff}_depth_flanking_Ns.bedpe
+	-o ${prefix}_probabilities_filtered_cutoff_${params.cutoff}_depth_flanking_Ns.bedpe \
 	source deactivate
 	"""
 }
-
