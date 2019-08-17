@@ -38,14 +38,21 @@ def parse_cl_args(in_args):
     parser.add_argument("-r", "--reciprocal", type=float, default=0.5,
                         help="Minimum fraction of reciprocal overlap needed "
                              "to collapse calls")
+    parser.add_argument("-he", "--heterozygous", type=bool, default=True,
+                        help="Boolean indicating whether calls will be "
+                             "classified as heterozygozous or homozygous in "
+                             "different samples. "
+                             "All calls will be considered homozygous if false.")
     args = parser.parse_args(in_args)
     return args
 
-def obtain_sites_and_genotypes(input_fns):
+def obtain_sites_and_genotypes(input_fns, heterozygous=True):
     """
     Obtain all CNV sites from a list of VCF files
 
     :param input_fns: List of paths to VCF files
+    :param heterozygous: Boolean indicating whether calls will be classified
+    into heterozygous or homozygous. All calls will be homozygous if false.
     :return: Set containing all sites. Sites are tuples
     (chrom, pos, alt, end, sv_type, inschrom, inspos). Dict containing sites
     as keys and genotype lines of samples as values.
@@ -89,30 +96,34 @@ def obtain_sites_and_genotypes(input_fns):
                 dhffc = record.samples[0]["DHFFC"]
                 # set genotypes based on format
                 gt = [".", "."]
-                if sv_type == "INS":
+                if not heterozygous:
+                    gt[0] = "1"
                     gt[1] = "1"
-                elif sv_type == "DEL":
-                    if dhfc >= 0 and dhfc < 0.25:
-                        gt[0] = "1"
-                        gt[1] = "1"
-                    elif dhfc >= 0.25 and dhfc < 0.75:
-                        gt[0] = "0"
-                        gt[1] = "1"
-                    else:
-                        gt[0] = "0"
-                        gt[1] = "0"
-                elif sv_type == "DUP:TANDEM" or sv_type == "DUP:DISPERSED":
-                    if dhfc >= 0 and dhfc < 1.25:
-                        gt[0] = "0"
-                        gt[1] = "0"
-                    elif dhfc >= 1.25 and dhfc < 1.75:
-                        gt[0] = "0"
-                        gt[1] = "1"
-                    else:
-                        gt[0] = "1"
-                        gt[1] = "1"
                 else:
-                    raise ValueError("Cannot genotype unknown SV type: {}".format(sv_type))
+                    if sv_type == "INS":
+                        gt[1] = "1"
+                    elif sv_type == "DEL":
+                        if dhfc >= 0 and dhfc < 0.25:
+                            gt[0] = "1"
+                            gt[1] = "1"
+                        elif dhfc >= 0.25 and dhfc < 0.75:
+                            gt[0] = "0"
+                            gt[1] = "1"
+                        else:
+                            gt[0] = "0"
+                            gt[1] = "0"
+                    elif sv_type == "DUP:TANDEM" or sv_type == "DUP:DISPERSED":
+                        if dhfc >= 0 and dhfc < 1.25:
+                            gt[0] = "0"
+                            gt[1] = "0"
+                        elif dhfc >= 1.25 and dhfc < 1.75:
+                            gt[0] = "0"
+                            gt[1] = "1"
+                        else:
+                            gt[0] = "1"
+                            gt[1] = "1"
+                    else:
+                        raise ValueError("Cannot genotype unknown SV type: {}".format(sv_type))
                 gt = "/".join(gt)
                 # add genotype line to samples dict
                 if tool:
@@ -312,7 +323,7 @@ def write_to_output_vcf(output_vcf_fn, chrom_length_dict, sites_interval_trees, 
     if sites_dict:
         sorted_sites = sorted(sites_dict.keys(), key=operator.itemgetter(0, 1, 3, 4, 2, 5, 6))
     # produce VCF header
-    sample_names = samples_dict.keys()
+    sample_names = sorted(list(samples_dict.keys()))
     sample_names_header = "\t".join(sample_names)
     vcf_header_elems = ["##fileformat=VCFv4.3",
                         "##fileDate={}".format(datetime.date.today().strftime("%Y%m%d")),
@@ -385,7 +396,7 @@ def write_to_output_vcf(output_vcf_fn, chrom_length_dict, sites_interval_trees, 
             output_vcf.write("\n")
     return 0
 
-def merge_vcfs(input_fn, output_vcf_fn, chrom_length_dict, reciprocal=0.5):
+def merge_vcfs(input_fn, output_vcf_fn, chrom_length_dict, reciprocal=0.5, heterozygous=True):
     """
     Merge VCF files of single samples containing CNVs called by Hecaton,
     producing a single VCF file containing the merged calls
@@ -393,6 +404,8 @@ def merge_vcfs(input_fn, output_vcf_fn, chrom_length_dict, reciprocal=0.5):
     :param output_vcf_fn: File containing path to VCF file
     :param chrom_length_dict: Dictionary with chromosomes as keys and
     length of chromosomes as values
+    :param heterozygous: Boolean indicating whether calls will be classified
+    into heterozygous or homozygous. All calls will be homozygous if false.
     :param reciprocal: Minimum reciprocal overlap required to collapse CNVs
     :return: 0 (integer)
     """
@@ -402,7 +415,7 @@ def merge_vcfs(input_fn, output_vcf_fn, chrom_length_dict, reciprocal=0.5):
         for line in input_file:
             input_fns.append(line.strip())
     # obtain all sites and genotype information
-    sites_set, samples_dict = obtain_sites_and_genotypes(input_fns)
+    sites_set, samples_dict = obtain_sites_and_genotypes(input_fns, heterozygous)
     # get interval tree in which sites considered to be the same CNV are collapsed
     sites_interval_tree = get_interval_tree_from_sites_set(sites_set,
                                                            chrom_length_dict,
@@ -425,7 +438,8 @@ def main():
     if args.reciprocal < 0 or args.reciprocal > 1:
         raise ValueError("Reciprocal overlap must be between 0 and 1")
     # merge vcf files
-    merge_vcfs(args.input_file, args.output_vcf, chrom_length_dict, args.reciprocal)
+    merge_vcfs(args.input_file, args.output_vcf, chrom_length_dict,
+               args.reciprocal, args.heterozygous)
 
 if __name__ == "__main__":
     main()

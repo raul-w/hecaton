@@ -14,6 +14,7 @@ Hecaton is a framework specifically designed for plant genomes that detects copy
   - [Running multiple samples at once](#multiple)
   - [Balancing sensitivity and precision](#sensitivity-precision)
   - [Applying Hecaton to low quality reference genomes or samples distantly related to the reference](#complex_genomes)
+  - [Converting the BEDPE output to VCF](#convert_to_vcf)
 - [Limitations](#limit)
 
 ## <a name="overview"></a>Workflow of Hecaton
@@ -172,7 +173,7 @@ The other parameters are optional:
 nextflow run -c nextflow/nextflow.config -w hecaton_workdir nextflow/hecaton.nf -resume --genome_file genome.fa --reads "reads_{1,2}.fq" --manta_config docker/configManta_weight_1.py.ini --output_dir output --model models/random_forest_model_concat_A_thaliana_ColxCvi_O_sativa_Suijing18_coverage_10x_insertions_balanced_subsample.pkl
 ```
 
-* `-c`: indicates a config file specifying the number of CPU cores and memory that will be assigned to Hecaton. The default `nextflow/nextflow.config` file assigns a maximum of 16 cores and 32 GB of RAM to Hecaton. This config file can be tuned to fit a specific computational setup. See the [Nextflow manual][nextflow_man] for additional details about generating a config file.  
+* `-c`: indicates a config file specifying the number of CPU cores and memory that will be assigned to Hecaton. The default `nextflow/nextflow.config` file assigns a maximum of 16 cores and 32 GB of RAM to Hecaton. This config file can be tuned to fit a specific computational setup. See the [Nextflow manual][nextflow_man] for additional details about generating a config file. As an example, the `nextflow/nextflow_slurm.config` can be used to run Hecaton on a HPC with Slurm (queue stills needs to be specified in this file).    
 
 ### <a name="multiple"></a>Running multiple samples at once
 
@@ -194,6 +195,35 @@ Low quality reference genomes containing a large number of gaps or samples dista
 ```bash
 nextflow run -c nextflow/nextflow.config -w hecaton_workdir nextflow/hecaton.nf --genome_file genome.fa --reads "reads_{1,2}.fastq" --manta_config docker/configManta_weight_1.py.ini --output_dir output --model models/random_forest_model_concat_A_thaliana_ColxCvi_O_sativa_Suijing18_coverage_10x_insertions_balanced_subsample.pkl --extra_filtering true
 ```
+
+### <a name="convert_to_vcf"></a>Converting BEDPE output to VCF
+
+The `bedpe_to_vcf.py` script can be used to convert BEDPE output files to VCF format. It is recommended to compress and index the VCF file using `bgzip` and `tabix`, and to compute the read depth of each CNV using `duphold`.
+```bash
+source activate hecaton_py3
+scripts/convert/bedpe_to_vcf.py -i output.bedpe -o output.vcf -s name_of_your_sample
+bgzip output.vcf
+tabix output.vcf.gz
+duphold -t number_of_threads -v output.vcf.gz -b alignment_of_this_sample.bam -f reference.fa -o output_duphold.vcf
+bgzip output_duphold.vcf
+tabix output_duphold.vcf.gz
+source deactivate
+```
+
+### <a name="merging"></a>Merging and genotyping multiple samples
+
+The output of multiple samples can be merged into a large VCF file, if they have been converted from BEDPE to VCF format and post-processed by `duphold` (see [Converting BEDPE output to VCF](#convert_to_vcf)). Calls are collapsed into a single events if share a specified fraction of reciprocal overlap (default 0.5) and if their breakpoints are located within 1000 bp of each other. 
+```bash
+source activate hecaton_py3
+scripts/genotype/merge_vcf_files.py -i samples.txt -f reference.fa.fai -o merged_samples.vcf -r 0.5
+source deactivate
+``` 
+
+The merging script uses the following arguments:
+* `-i`: File containing a path to a single sample VCF file (compressed by `bgzip`, indexed by `tabix`, and post-processed by `duphold`) on each line
+* `-f`: Index file of used reference genome (generated using `samtools faidx`)
+* `-o`: Name of the output file.
+* `-r`: Minimum fraction of reciprocal overlap at which calls are merged
 
 ## <a name="limit"></a>Limitations
 
