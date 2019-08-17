@@ -15,6 +15,7 @@ Hecaton is a framework specifically designed for plant genomes that detects copy
   - [Balancing sensitivity and precision](#sensitivity-precision)
   - [Applying Hecaton to low quality reference genomes or samples distantly related to the reference](#complex_genomes)
   - [Converting the BEDPE output to VCF](#convert_to_vcf)
+  - [Merging and genotyping multiple samples](#merging)
 - [Limitations](#limit)
 
 ## <a name="overview"></a>Workflow of Hecaton
