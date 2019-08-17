@@ -9,6 +9,7 @@
 
 params.genome_file = ""
 params.reads = "prefix_{1,2}.fastq"
+params.alignment_exclude = 'NO_EXCLUDE'
 params.model_file = ""
 params.cutoff = 0.7
 params.extra_filtering = false
@@ -36,6 +37,7 @@ def helpMessage() {
     --output_dir: Output directory to which all results will be written
     
     Optional arguments:
+    --alignment_exclude: BED file containing chromosomal regions that will be excluded from CNV calling
     -w: Working directory to which intermediate results will be written. Default: work
     -c: Config file specifying the number of CPU cores and memory that will be assigned to Hecaton
     """.stripIndent()
@@ -80,6 +82,7 @@ genome_N_file = file(params.genome_file + ".N.bed")
 genome_bed = file(params.genome_file + ".genome")
 manta_config_file = file(params.manta_config)
 model_file = file(params.model_file)
+exclude_file = file(params.alignment_exclude)
 
 /*
  * Align reads to reference genome using speedseq
@@ -98,6 +101,7 @@ process align_reads {
 	file genome_bwa_bwt_file
 	file genome_bwa_pac_file
 	file genome_bwa_sa_file
+	file exclude_file
 
 	output:
 	set val(prefix), file("${prefix}.bam") into bwa_bams
@@ -108,12 +112,32 @@ process align_reads {
 	set val(prefix), file("${prefix}.splitters.bam.bai") into bwa_splitters_bam_indices
 
 	script:
-	"""
-	source activate hecaton_py3
-	speedseq align -t ${task.cpus} -o ${prefix} -R \"@RG\tID:${prefix}\tSM:${prefix}\tLB:${prefix}\" \
-	${genome_file} ${reads[0]} ${reads[1]}
-	source deactivate
-	"""
+	if( exclude_file.name == 'NO_EXCLUDE' ) 
+		"""
+		source activate hecaton_py3
+		speedseq align -t ${task.cpus} -o ${prefix} -R \"@RG\tID:${prefix}\tSM:${prefix}\tLB:${prefix}\" \
+		${genome_file} ${reads[0]} ${reads[1]}
+		source deactivate
+		"""
+	else
+		"""
+		source activate hecaton_py3
+		speedseq align -t ${task.cpus} -o ${prefix} -R \"@RG\tID:${prefix}\tSM:${prefix}\tLB:${prefix}\" \
+		${genome_file} ${reads[0]} ${reads[1]} && \
+		samtools view -h -b -L ${exclude_file} ${prefix}.bam > ${prefix}_excluded.bam && \
+		samtools index ${prefix}_excluded.bam && \
+		mv ${prefix}_excluded.bam ${prefix}.bam && \
+		mv ${prefix}_excluded.bam.bai ${prefix}.bam.bai && \
+		samtools view -h -b -L ${exclude_file} ${prefix}.discordants.bam > ${prefix}.discordants_excluded.bam && \
+		samtools index ${prefix}.discordants_excluded.bam && \
+		mv ${prefix}.discordants_excluded.bam ${prefix}.discordants.bam && \
+		mv ${prefix}.discordants_excluded.bam.bai ${prefix}.discordants.bam.bai && \
+		samtools view -h -b -L ${exclude_file} ${prefix}.splitters.bam > ${prefix}.splitters_excluded.bam && \
+		samtools index ${prefix}.splitters_excluded.bam && \
+		mv ${prefix}.splitters_excluded.bam ${prefix}.splitters.bam && \
+		mv ${prefix}.splitters_excluded.bam.bai ${prefix}.splitters.bam.bai && \
+		source deactivate
+		"""
 }
 
 /*

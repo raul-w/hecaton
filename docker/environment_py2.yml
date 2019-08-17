@@ -4,7 +4,6 @@ name: hecaton_py2
 channels:
   - bioconda
   - conda-forge
-  - defaults
 dependencies:
   # python
   - python=2.7

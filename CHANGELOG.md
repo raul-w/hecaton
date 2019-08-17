@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.0] - 2019-04-25
 ### Added
 - Hecaton can now be run with pre-generated BWA mem alignments
+- Certain chromosomal regions can now be excluded from CNV calling
 
 ## [0.1.0] - 2019-03-16
 ### Added

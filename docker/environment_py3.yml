@@ -4,7 +4,6 @@ name: hecaton_py3
 channels:
   - bioconda
   - conda-forge
-  - r
   - defaults
 dependencies:
   # python
