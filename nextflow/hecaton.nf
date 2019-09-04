@@ -4,7 +4,7 @@
  *@authors
  *Raúl Wijfjes <raul.wijfjes@wur.nl>
  *
- *Date last modified: 25-04-2019
+ *Date last modified: 04-09-2019
  */
 
 params.genome_file = ""
@@ -24,7 +24,7 @@ params.help = false
 def helpMessage() {
     log.info"""
     =========================================
-     Hecaton v0.2.0
+     Hecaton v0.2.1
     =========================================
     Usage:
     nextflow run hecaton --genome_file reference.fa --reads "prefix_{1,2}.fastq" --manta_config configManta_weight_1.py.ini --model_file model_file.pkl --output_dir results
@@ -114,14 +114,14 @@ process align_reads {
 	script:
 	if( exclude_file.name == 'NO_EXCLUDE' ) 
 		"""
-		source activate hecaton_py3
+		source activate hecaton_py3 && \
 		speedseq align -t ${task.cpus} -o ${prefix} -R \"@RG\tID:${prefix}\tSM:${prefix}\tLB:${prefix}\" \
-		${genome_file} ${reads[0]} ${reads[1]}
+		${genome_file} ${reads[0]} ${reads[1]} && \
 		source deactivate
 		"""
 	else
 		"""
-		source activate hecaton_py3
+		source activate hecaton_py3 && \
 		speedseq align -t ${task.cpus} -o ${prefix} -R \"@RG\tID:${prefix}\tSM:${prefix}\tLB:${prefix}\" \
 		${genome_file} ${reads[0]} ${reads[1]} && \
 		samtools view -h -b -L ${exclude_file} ${prefix}.bam > ${prefix}_excluded.bam && \

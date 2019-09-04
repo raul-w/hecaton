@@ -78,6 +78,18 @@ The dependencies of Hecaton can be installed locally or obtained through a Docke
 
 ### <a name="local"></a>Local installation
 
+After installing all the prerequisites, the following commands can be used to do a quick local installation in which all dependencies are located in the directory of the Hecaton repository. Note that this script adds a few lines to `~/.bashrc`.
+
+```bash
+bash install.sh
+``` 
+
+The following command tests whether Hecaton was installed correctly. Please ensure that you have installed Nextflow before running it (see [Prerequisites](#prerequisites)).
+```bash
+bash tests/functional_test.sh
+```
+A complete overview of all installation commands is given below.
+
 Most dependencies can be installed by generating two custom `conda` environments, named `hecaton_py3` and `hecaton_py2`:
 ```bash
 cd hecaton && \
@@ -107,11 +119,6 @@ cd ../..
 
 The installation directory (hecaton_deps) can be modified according to preference, as long as all binaries in `speedseq/bin` are added to the $PATH environment variable, and the $GRIDSS_JAR and $PICARD environment variables contain the jar files of GRIDSS and Picard respectively. 
 
-To test whether Hecaton was installed correctly, you can run
-```bash
-bash tests/functional_test.sh
-```
-
 ### <a name="docker"></a>Docker
 
 Hecaton can be run through a Docker image, avoiding the need to install dependencies locally:
@@ -123,7 +130,7 @@ cd ..
 
 These commands need to be re-run each time a new version of Hecaton is acquired. 
 
-The following command tests whether the image has been correctly built:
+The following command tests whether the image has been correctly built. Please ensure that you have installed Nextflow before running it (see [Prerequisites](#prerequisites)).
 
 ```bash
 bash tests/functional_test_docker.sh

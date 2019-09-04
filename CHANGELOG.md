@@ -5,6 +5,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Quick and dirty local installation script
+
+### Changed
+- Made it clearer in the documentation that you need to have installed Nextflow before testing the Hecaton installation
+- Updated the version of Hecaton in the Dockerfile, Docker container building script, and Docker installation test script
+
+### Fixed
+- Conda environments are now activated properly when running Hecaton with newer versions of Nextflow
 
 ## [0.2.0] - 2019-08-17
 ### Added

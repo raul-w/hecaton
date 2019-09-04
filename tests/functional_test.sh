@@ -1,32 +1,31 @@
 #!/bin/bash
 
-set -eu
+set -e
 
 mkdir -p test_wd && cd test_wd && \
 
-# nextflow run -w functional_workdir -c ../nextflow/nextflow.config -resume ../nextflow/hecaton.nf \
-# 	--genome_file ../tests/functional/test.fa \
-# 	--reads "../tests/functional/test{1,2}.fq.gz" \
-# 	--model_file ../models/random_forest_model_concat_A_thaliana_ColxCvi_O_sativa_Suijing18_coverage_10x_insertions_balanced_subsample.pkl \
-# 	--cutoff 0.7 \
-# 	--manta_config ../docker/configManta_weight_1.py.ini \
-# 	--extra_filtering true \
-# 	--output_dir test_o && \
-# 	echo "Functional test with non-empty input successful" && \
+nextflow run -w functional_workdir -c ../nextflow/nextflow.config -resume ../nextflow/hecaton.nf \
+	--genome_file ../tests/functional/test.fa \
+	--reads "../tests/functional/test{1,2}.fq.gz" \
+	--model_file ../models/random_forest_model_concat_A_thaliana_ColxCvi_O_sativa_Suijing18_coverage_10x_insertions_balanced_subsample.pkl \
+	--cutoff 0.7 \
+	--manta_config ../docker/configManta_weight_1.py.ini \
+	--extra_filtering true \
+	--output_dir test_o && \
+	echo "Functional test with non-empty input successful" && \
 
-# nextflow run -w functional_workdir_empty -c ../nextflow/nextflow.config -resume ../nextflow/hecaton.nf \
-# 	--genome_file ../tests/functional/test.fa \
-# 	--reads "../tests/functional/test_empty{1,2}.fq.gz" \
-# 	--model_file ../models/random_forest_model_concat_A_thaliana_ColxCvi_O_sativa_Suijing18_coverage_10x_insertions_balanced_subsample.pkl \
-# 	--cutoff 0.7 \
-# 	--manta_config ../docker/configManta_weight_1.py.ini \
-# 	--extra_filtering true \
-# 	--output_dir test_o_empty && \
-# 	echo "Functional test with empty input successful" && \
+nextflow run -w functional_workdir_empty -c ../nextflow/nextflow.config -resume ../nextflow/hecaton.nf \
+	--genome_file ../tests/functional/test.fa \
+	--reads "../tests/functional/test_empty{1,2}.fq.gz" \
+	--model_file ../models/random_forest_model_concat_A_thaliana_ColxCvi_O_sativa_Suijing18_coverage_10x_insertions_balanced_subsample.pkl \
+	--cutoff 0.7 \
+	--manta_config ../docker/configManta_weight_1.py.ini \
+	--extra_filtering true \
+	--output_dir test_o_empty && \
+	echo "Functional test with empty input successful" && \
 
-source activate hecaton_py3
-merge_vcf_files.py -i ../tests/genotyping/test_input.txt -f ../tests/genotyping/test.fa.fai -o test_output.vcf
-
+source activate hecaton_py3 && \
+merge_vcf_files.py -i ../tests/genotyping/test_input.txt -f ../tests/genotyping/test.fa.fai -o test_output.vcf && \
 
 DIFF=$(diff test_output.vcf ../tests/genotyping/expected_output.vcf | wc -l)
 if [ "$DIFF" != "4" ] 

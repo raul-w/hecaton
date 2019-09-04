@@ -70,8 +70,8 @@ RUN source activate hecaton_py2 && \
 # Setup hecaton pipeline
 # RUN git clone https://git.wur.nl/wijfj001/hecaton.git && cd hecaton && \
 #	git checkout e85bba0c && cd .. && \
-RUN git clone https://git.wur.nl/wijfj001/hecaton.git && \
-	echo "6a7f90b0" && \
+RUN git clone https://git.wur.nl/bioinformatics/hecaton.git && \
+	echo "f9f9a7f1" && \
 	chmod +x hecaton/scripts/collapse/* && \
 	chmod +x hecaton/scripts/convert/* && \
 	chmod +x hecaton/scripts/filter/* && \
