@@ -78,7 +78,7 @@ The dependencies of Hecaton can be installed locally or obtained through a Docke
 
 ### <a name="local"></a>Local installation
 
-After installing all the prerequisites, the following commands can be used to do a quick local installation in which all dependencies are located in the directory of the Hecaton repository. Note that this script adds a few lines to `~/.bashrc`.
+After installing all the prerequisites, the following command can be used to do a quick local installation in which all dependencies are located in the directory of the Hecaton repository. Note that this script adds a few lines to `~/.bashrc`.
 
 ```bash
 bash install.sh
