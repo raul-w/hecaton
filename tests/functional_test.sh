@@ -24,6 +24,16 @@ nextflow run -w functional_workdir_empty -c ../nextflow/nextflow.config -resume 
 	--output_dir test_o_empty && \
 	echo "Functional test with empty input successful" && \
 
+nextflow run -w functional_workdir_no_align -c ../nextflow/nextflow.config -resume ../nextflow/hecaton_no_align.nf \
+	--genome_file ../tests/functional/test.fa \
+	--bwa_bams "../tests/functional/test.bam" \
+	--model_file ../models/random_forest_model_concat_A_thaliana_ColxCvi_O_sativa_Suijing18_coverage_10x_insertions_balanced_subsample.pkl \
+	--cutoff 0.7 \
+	--manta_config ../docker/configManta_weight_1.py.ini \
+	--extra_filtering true \
+	--output_dir test_no_align && \
+	echo "Functional test without doing alignments successful" && \
+
 source activate hecaton_py3 && \
 merge_vcf_files.py -i ../tests/genotyping/test_input.txt -f ../tests/genotyping/test.fa.fai -o test_output.vcf && \
 

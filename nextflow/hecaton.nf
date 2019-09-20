@@ -24,7 +24,7 @@ params.help = false
 def helpMessage() {
     log.info"""
     =========================================
-     Hecaton v0.2.1
+     Hecaton v0.2.2
     =========================================
     Usage:
     nextflow run hecaton --genome_file reference.fa --reads "prefix_{1,2}.fastq" --manta_config configManta_weight_1.py.ini --model_file model_file.pkl --output_dir results
@@ -38,6 +38,7 @@ def helpMessage() {
     
     Optional arguments:
     --alignment_exclude: BED file containing chromosomal regions that will be excluded from CNV calling
+    --extra_filtering: If true, filter CNVs based on read depth and overlap with Ns. Default: false 
     -w: Working directory to which intermediate results will be written. Default: work
     -c: Config file specifying the number of CPU cores and memory that will be assigned to Hecaton
     """.stripIndent()
