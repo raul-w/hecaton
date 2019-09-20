@@ -11,8 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Test to check if running Hecaton with pre-generated alignments works correctly
 
+### Changed
+- Included additional dependencies in the documentation that are needed when running Hecaton on a fresh Ubuntu install
+
 ### Fixed
-- Bug which prevented running Hecaton with pre-generated alignments without excluding alignments
+- Bugs which prevented Hecaton from running properly when using pre-generated alignments
 
 ## [0.2.1] - 2019-09-05
 ### Added

@@ -33,7 +33,7 @@ Hecaton consists of the following steps:
 
 ### <a name="prerequisites"></a>Prerequisites
 
-Hecaton can only be installed on Linux systems and requires `git` and Anaconda/Miniconda (Python 3.6+) to be present on the system and available through the $PATH environmental variable. Furthermore, ensure libncurses5-dev is installed:
+Hecaton can only be installed on Linux systems and requires `git`, `gawk`, `python-dev`, `python3-dev`, and Anaconda/Miniconda (Python 3.6+) to be present on the system and available through the $PATH environmental variable. Furthermore, ensure libncurses5-dev is installed:
 ```bash
 sudo apt update
 sudo apt install libncurses5-dev

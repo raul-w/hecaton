@@ -4,7 +4,7 @@
  *@authors
  *Raúl Wijfjes <raul.wijfjes@wur.nl>
  *
- *Date last modified: 25-04-2019
+ *Date last modified: 10-09-2019
  */
 
 params.genome_file = ""
@@ -384,6 +384,7 @@ process apply_random_forest {
 	input:
 	set val(prefix), file(insertion_file) from insertion_feature_files
 	set val(prefix), file(non_insertion_file) from non_insertion_feature_files
+	file model_file
 
 	output:
 	set val(prefix), file("${prefix}_probabilities_unfiltered.bedpe") into probability_files
@@ -485,6 +486,7 @@ process filter_calls_flanking_Ns {
 
 	input:
 	set val(prefix), file(probability_file) from depth_files
+	file genome_bed
 
 	output:
 	set val(prefix), file("${prefix}_probabilities_filtered_cutoff_${params.cutoff}_depth_flanking_Ns.bedpe") into flank_files

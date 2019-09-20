@@ -71,7 +71,7 @@ RUN source activate hecaton_py2 && \
 # RUN git clone https://git.wur.nl/wijfj001/hecaton.git && cd hecaton && \
 #	git checkout e85bba0c && cd .. && \
 RUN git clone https://git.wur.nl/bioinformatics/hecaton.git && \
-	echo "f31e5059" && \
+	echo "8a8bba7a" && \
 	chmod +x hecaton/scripts/collapse/* && \
 	chmod +x hecaton/scripts/convert/* && \
 	chmod +x hecaton/scripts/filter/* && \
