@@ -56,7 +56,7 @@ Finally, the Hecaton scripts themselves need to be obtained and added to $PATH.
 
 Clone the repository to your directory of choice:
 ```bash
-git clone https://git.wageningenur.nl/wijfj001/hecaton.git
+git clone https://git.wur.nl/bioinformatics/hecaton.git
 ```
 
 Set permissions and add all scripts of Hecaton to $PATH:
@@ -122,7 +122,6 @@ The installation directory (hecaton_deps) can be modified according to preferenc
 ### <a name="docker"></a>Docker
 
 Hecaton can be run through a Docker image, avoiding the need to install dependencies locally. This can be done by pulling the latest image from Docker Hub:
-
 ```bash
 docker pull rwijfjes/hecaton
 ``` 
