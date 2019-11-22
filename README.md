@@ -121,7 +121,13 @@ The installation directory (hecaton_deps) can be modified according to preferenc
 
 ### <a name="docker"></a>Docker
 
-Hecaton can be run through a Docker image, avoiding the need to install dependencies locally:
+Hecaton can be run through a Docker image, avoiding the need to install dependencies locally. This can be done by pulling the latest image from Docker Hub:
+
+```bash
+docker pull rwijfjes/hecaton
+``` 
+
+Alternatively, you can build the image locally:
 ```bash
 cd hecaton/docker && \
 bash docker_build.sh && \
