@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Bug during merging in which homozygous insertions are reported for a sample, even if its VCF gives a reference or no call at that position   
 - Typo in hecaton.nf and hecaton_no_align.nf which caused speedseq -m parameter to be equal to the number of threads
+- Typos in manual
 
 ## [0.2.2] - 2019-09-20
 ### Added

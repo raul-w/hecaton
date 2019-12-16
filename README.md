@@ -165,12 +165,12 @@ A single command can then be used to run Hecaton on a set of paired-end reads:
 
 Local:
 ```bash
-nextflow run -c nextflow/nextflow.config -w hecaton_workdir nextflow/hecaton.nf --genome_file genome.fa --reads "reads_{1,2}.fq" --manta_config docker/configManta_weight_1.py.ini --output_dir output --model models/random_forest_model_concat_A_thaliana_ColxCvi_O_sativa_Suijing18_coverage_10x_insertions_balanced_subsample.pkl
+nextflow run -c nextflow/nextflow.config -w hecaton_workdir nextflow/hecaton.nf --genome_file genome.fa --reads "reads_{1,2}.fq" --manta_config docker/configManta_weight_1.py.ini --output_dir output --model_file models/random_forest_model_concat_A_thaliana_ColxCvi_O_sativa_Suijing18_coverage_10x_insertions_balanced_subsample.pkl
 ```
 
 Docker:
 ```bash
-nextflow run -with-docker hecaton:v1 -c nextflow/nextflow.config -w hecaton_workdir nextflow/hecaton.nf --genome_file genome.fa --reads "reads_{1,2}.fq" --manta_config docker/configManta_weight_1.py.ini --output_dir output --model models/random_forest_model_concat_A_thaliana_ColxCvi_O_sativa_Suijing18_coverage_10x_insertions_balanced_subsample.pkl
+nextflow run -with-docker hecaton:v1 -c nextflow/nextflow.config -w hecaton_workdir nextflow/hecaton.nf --genome_file genome.fa --reads "reads_{1,2}.fq" --manta_config docker/configManta_weight_1.py.ini --output_dir output --model_file models/random_forest_model_concat_A_thaliana_ColxCvi_O_sativa_Suijing18_coverage_10x_insertions_balanced_subsample.pkl
 ```
 
 The following parameters need to be specified when running Hecaton:
