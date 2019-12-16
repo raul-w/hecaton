@@ -186,7 +186,7 @@ process call_lumpy {
 	-D ${discordants_alignment_file} \
 	-S ${splitters_alignment_file} \
 	-R ${genome_file} \
-	-m ${task.cpus} &&
+	-m 1 &&
 	vcf_to_bedpe.py -i ${prefix}.sv.vcf.gz \
 	-o ${prefix}.bedpe -t LUMPY &&
 	process_simple_cnvs.py -i ${prefix}.sv.vcf.gz -o ${prefix}_post_processed.bedpe -t LUMPY &&

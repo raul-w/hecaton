@@ -96,12 +96,20 @@ def obtain_sites_and_genotypes(input_fns, heterozygous=True):
                 dhffc = record.samples[0]["DHFFC"]
                 # set genotypes based on format
                 gt = [".", "."]
+                non_calls = [(None, None), (0, 0)]
+                called_gt = record.samples[0]["GT"]
                 if not heterozygous:
                     gt[0] = "1"
                     gt[1] = "1"
                 else:
                     if sv_type == "INS":
-                        gt[1] = "1"
+                        # do not call INS if single sample shows reference only or no call
+                        if called_gt in non_calls:
+                            gt[0] = called_gt[0]
+                            gt[1] = called_gt[1]
+                        else: 
+                            # call can be only be ./1, based on available evidence
+                            gt[1] = "1"                        
                     elif sv_type == "DEL":
                         if dhfc >= 0 and dhfc < 0.25:
                             gt[0] = "1"

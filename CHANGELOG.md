@@ -6,12 +6,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [0.3.0] - 2019-12-16
+### Added
+- Script to easily filter Hecaton output (nextflow/hecaton_filter_size_cutoff.nf)
+
 ### Changed
 - Added docker pull option in documentation
 - Corrected link to old repository in documentation
 
-## [0.2.2] - 2019-09-20
+### Fixed
+- Bug during merging in which homozygous insertions are reported for a sample, even if its VCF gives a reference or no call at that position   
+- Typo in hecaton.nf and hecaton_no_align.nf which caused speedseq -m parameter to be equal to the number of threads
 
+## [0.2.2] - 2019-09-20
 ### Added
 - Test to check if running Hecaton with pre-generated alignments works correctly
 
@@ -47,7 +54,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial release of Hecaton
 
-[Unreleased]: https://git.wur.nl/bioinformatics/hecaton/compare/v0.2.1...master
+[Unreleased]: https://git.wur.nl/bioinformatics/hecaton/compare/v0.3.0...master
+[0.3.0]: https://git.wur.nl/bioinformatics/hecaton/tags/v0.3.0
+[0.2.2]: https://git.wur.nl/bioinformatics/hecaton/tags/v0.2.2
 [0.2.1]: https://git.wur.nl/bioinformatics/hecaton/tags/v0.2.1
 [0.2.0]: https://git.wur.nl/bioinformatics/hecaton/tags/v0.2.0
 [0.1.0]: https://git.wur.nl/bioinformatics/hecaton/tags/v0.1.0
