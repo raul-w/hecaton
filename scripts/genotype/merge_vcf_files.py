@@ -38,21 +38,23 @@ def parse_cl_args(in_args):
     parser.add_argument("-r", "--reciprocal", type=float, default=0.5,
                         help="Minimum fraction of reciprocal overlap needed "
                              "to collapse calls")
-    parser.add_argument("-he", "--heterozygous", type=bool, default=True,
-                        help="Boolean indicating whether calls will be "
-                             "classified as heterozygozous or homozygous in "
-                             "different samples. "
-                             "All calls will be considered homozygous if false.")
+    parser.add_argument("-he", "--heterozygous", default=False, action='store_true',
+                        help="If set, all heterozygous calls will be considered homozygous.")
+    parser.add_argument("-nge", "--no_genotyping", default=True, action='store_false',
+                        help="If set, calls will not be genotyped based on read depth "
+                             "computations made by duphold.")
     args = parser.parse_args(in_args)
     return args
 
-def obtain_sites_and_genotypes(input_fns, heterozygous=True):
+def obtain_sites_and_genotypes(input_fns, heterozygous=True, genotyping=True):
     """
     Obtain all CNV sites from a list of VCF files
 
     :param input_fns: List of paths to VCF files
     :param heterozygous: Boolean indicating whether calls will be classified
     into heterozygous or homozygous. All calls will be homozygous if false.
+    :param genotyping: Boolean indicating whether calls will be genotyped
+    based on read depth computed by duphold.
     :return: Set containing all sites. Sites are tuples
     (chrom, pos, alt, end, sv_type, inschrom, inspos). Dict containing sites
     as keys and genotype lines of samples as values.
@@ -96,27 +98,44 @@ def obtain_sites_and_genotypes(input_fns, heterozygous=True):
                 dhffc = record.samples[0]["DHFFC"]
                 # set genotypes based on format
                 gt = [".", "."]
-                non_calls = [(None, None), (0, 0)]
+                non_calls = [(".", "."), (0, 0)]
                 called_gt = record.samples[0]["GT"]
-                if not heterozygous:
-                    gt[0] = "1"
-                    gt[1] = "1"
+                if not genotyping:
+                    if called_gt[0] == None:
+                        gt[0] = "."
+                    else:
+                        gt[0] = str(called_gt[0])
+                    if called_gt[1] == None:
+                        gt[1] = "."
+                    else:
+                        gt[1] = str(called_gt[1])
                 else:
                     if sv_type == "INS":
                         # do not call INS if single sample shows reference only or no call
                         if called_gt in non_calls:
-                            gt[0] = called_gt[0]
-                            gt[1] = called_gt[1]
+                            if called_gt[0] == None:
+                                gt[0] = "."
+                            else:
+                                gt[0] = str(called_gt[0])
+                            if called_gt[1] == None:
+                                gt[1] = "."
+                            else:
+                                gt[1] = str(called_gt[1])
                         else: 
                             # call can be only be ./1, based on available evidence
                             gt[1] = "1"                        
                     elif sv_type == "DEL":
+                        print("Wrong")
                         if dhfc >= 0 and dhfc < 0.25:
                             gt[0] = "1"
                             gt[1] = "1"
                         elif dhfc >= 0.25 and dhfc < 0.75:
-                            gt[0] = "0"
-                            gt[1] = "1"
+                            if not heterozygous:
+                                gt[0] = "1"
+                                gt[1] = "1"
+                            else:
+                                gt[0] = "0"
+                                gt[1] = "1"
                         else:
                             gt[0] = "0"
                             gt[1] = "0"
@@ -125,8 +144,12 @@ def obtain_sites_and_genotypes(input_fns, heterozygous=True):
                             gt[0] = "0"
                             gt[1] = "0"
                         elif dhfc >= 1.25 and dhfc < 1.75:
-                            gt[0] = "0"
-                            gt[1] = "1"
+                            if not heterozygous:
+                                gt[0] = "1"
+                                gt[1] = "1"
+                            else:
+                                gt[0] = "0"
+                                gt[1] = "1"
                         else:
                             gt[0] = "1"
                             gt[1] = "1"
@@ -404,7 +427,7 @@ def write_to_output_vcf(output_vcf_fn, chrom_length_dict, sites_interval_trees, 
             output_vcf.write("\n")
     return 0
 
-def merge_vcfs(input_fn, output_vcf_fn, chrom_length_dict, reciprocal=0.5, heterozygous=True):
+def merge_vcfs(input_fn, output_vcf_fn, chrom_length_dict, reciprocal=0.5, heterozygous=True, genotyping=True):
     """
     Merge VCF files of single samples containing CNVs called by Hecaton,
     producing a single VCF file containing the merged calls
@@ -414,6 +437,8 @@ def merge_vcfs(input_fn, output_vcf_fn, chrom_length_dict, reciprocal=0.5, heter
     length of chromosomes as values
     :param heterozygous: Boolean indicating whether calls will be classified
     into heterozygous or homozygous. All calls will be homozygous if false.
+    :param genotyping: Boolean indicating whether calls will be genotyped
+    based on read depth computed by duphold.
     :param reciprocal: Minimum reciprocal overlap required to collapse CNVs
     :return: 0 (integer)
     """
@@ -423,7 +448,7 @@ def merge_vcfs(input_fn, output_vcf_fn, chrom_length_dict, reciprocal=0.5, heter
         for line in input_file:
             input_fns.append(line.strip())
     # obtain all sites and genotype information
-    sites_set, samples_dict = obtain_sites_and_genotypes(input_fns, heterozygous)
+    sites_set, samples_dict = obtain_sites_and_genotypes(input_fns, heterozygous, genotyping)
     # get interval tree in which sites considered to be the same CNV are collapsed
     sites_interval_tree = get_interval_tree_from_sites_set(sites_set,
                                                            chrom_length_dict,
@@ -447,7 +472,7 @@ def main():
         raise ValueError("Reciprocal overlap must be between 0 and 1")
     # merge vcf files
     merge_vcfs(args.input_file, args.output_vcf, chrom_length_dict,
-               args.reciprocal, args.heterozygous)
+               args.reciprocal, args.heterozygous, args.no_genotyping)
 
 if __name__ == "__main__":
     main()

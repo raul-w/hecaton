@@ -47,13 +47,15 @@ def vcf_to_table(input_fn, output_fn, fields=None, genotype_fields=None):
         samples = list(vcf.header.samples)
         samples.sort()
         header_fields = []
-        standard_fields = ["CHROM", "POS", "REF", "ALT", "QUAL", "FILTER", "END", "HOM-VAR", "VAR"]
+        standard_fields = ["CHROM", "POS", "REF", "ALT", "QUAL", "FILTER", "END", "HOM-VAR", "VAR", "DEL_SUPPORTED"]
         standard_fields.extend(vcf.header.info)
         if fields:
             for field in fields:
                 if field not in standard_fields:
                     raise ValueError(
                         "{} not defined as standard or INFO field".format(field))
+                if field == "DEL_SUPPORTED":
+                    header_fields.extend(["DEL_SUPPORTED", "DEL_UNSUPPORTED", "NON_DEL_SUPPORTED", "NON_DEL_UNSUPPORTED"])
                 else:
                     header_fields.append(field)
         if genotype_fields:
@@ -116,6 +118,39 @@ def vcf_to_table(input_fn, output_fn, fields=None, genotype_fields=None):
                                 if genotype not in non_variants:
                                     var_calls += 1
                             record_fields.append(str(var_calls))
+                    elif field == "DEL_SUPPORTED":
+                        del_supported_calls = 0
+                        del_unsupported_calls = 0
+                        nondel_supported_calls = 0
+                        nondel_unsupported_calls = 0
+
+                        if record.info["SVTYPE"] != "DEL":
+                            record_fields.extend(["NA", "NA", "NA", "NA"])
+                        else:
+                            for sample in samples:
+                                genotype = record.samples[sample]["GT"]
+                                dhffc = record.samples[sample]["DHFFC"]
+                                non_variants = [(0, 0), (None, None),
+                                                (None, 0)]
+                                if genotype in non_variants:
+                                    if dhffc >= 0.75:
+                                        nondel_supported_calls += 1
+                                    else:
+                                        nondel_unsupported_calls += 1
+                                elif genotype == (0, 1):
+                                    if dhffc >= 0.25 and dhffc < 0.75:
+                                        del_supported_calls += 1
+                                    else:
+                                        del_unsupported_calls += 1
+                                elif genotype == (1, 1):
+                                    if dhffc >= 0 and dhffc < 0.25:
+                                        del_supported_calls += 1
+                                    else:
+                                        del_unsupported_calls += 1
+                            record_fields.append(str(del_supported_calls))
+                            record_fields.append(str(del_unsupported_calls))
+                            record_fields.append(str(nondel_supported_calls))
+                            record_fields.append(str(nondel_unsupported_calls))
                     elif field in record.info:
                         record_fields.append(str(record.info[field]))
                     else:
