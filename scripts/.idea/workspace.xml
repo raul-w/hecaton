@@ -4,7 +4,6 @@
     <list default="true" id="38800356-6f91-47c6-8c6a-4d9b650fe843" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change beforePath="$PROJECT_DIR$/convert/vcf_to_table.py" afterPath="$PROJECT_DIR$/convert/vcf_to_table.py" />
-      <change beforePath="$PROJECT_DIR$/genotype/merge_vcf_files.py" afterPath="$PROJECT_DIR$/genotype/merge_vcf_files.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -30,7 +29,7 @@
       <file leaf-file-name="filter_ref_sites_vcf.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/filter/filter_ref_sites_vcf.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="198">
+            <state relative-caret-position="162">
               <caret line="11" column="0" lean-forward="false" selection-start-line="11" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
               <folding />
             </state>
@@ -59,11 +58,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="merge_vcf_files.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="merge_vcf_files.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/genotype/merge_vcf_files.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="521">
-              <caret line="102" column="34" lean-forward="true" selection-start-line="102" selection-start-column="34" selection-end-line="102" selection-end-column="34" />
+            <state relative-caret-position="251">
+              <caret line="78" column="20" lean-forward="false" selection-start-line="78" selection-start-column="20" selection-end-line="78" selection-end-column="20" />
               <folding>
                 <element signature="e#132#147#0" expanded="true" />
               </folding>
@@ -72,10 +71,20 @@
         </entry>
       </file>
       <file leaf-file-name="vcf_to_table.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/../../../hecaton/scripts/convert/vcf_to_table.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="648">
+              <caret line="90" column="24" lean-forward="true" selection-start-line="90" selection-start-column="24" selection-end-line="90" selection-end-column="74" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="vcf_to_table.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/convert/vcf_to_table.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1602">
-              <caret line="152" column="78" lean-forward="false" selection-start-line="152" selection-start-column="78" selection-end-line="152" selection-end-column="78" />
+            <state relative-caret-position="380">
+              <caret line="80" column="28" lean-forward="true" selection-start-line="80" selection-start-column="28" selection-end-line="80" selection-end-column="28" />
               <folding>
                 <element signature="e#108#123#0" expanded="true" />
               </folding>
@@ -161,8 +170,8 @@
         <option value="$PROJECT_DIR$/intersect/intersecting_bedpe_intervals.py" />
         <option value="$PROJECT_DIR$/filter/filter_ref_sites_vcf.py" />
         <option value="$PROJECT_DIR$/convert/vcf_to_site_only_vcf.py" />
-        <option value="$PROJECT_DIR$/convert/vcf_to_table.py" />
         <option value="$PROJECT_DIR$/genotype/merge_vcf_files.py" />
+        <option value="$PROJECT_DIR$/convert/vcf_to_table.py" />
       </list>
     </option>
   </component>
@@ -195,6 +204,7 @@
     </navigator>
     <panes>
       <pane id="Scope" />
+      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -256,13 +266,12 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../hecaton/scripts/convert/vcf_to_table.py" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -294,7 +303,6 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="65" y="24" width="1857" height="1092" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3301887" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
@@ -302,7 +310,7 @@
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32914045" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32914045" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.44659656" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.45213062" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Docker" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32982844" sideWeight="0.5125786" order="4" side_tool="true" content_ui="tabs" />
       <window_info id="SciView" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32982844" sideWeight="0.4874214" order="3" side_tool="false" content_ui="tabs" />
@@ -331,13 +339,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/convert/bedpe_to_vcf.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1404">
-          <caret line="81" column="62" lean-forward="false" selection-start-line="81" selection-start-column="62" selection-end-line="81" selection-end-column="62" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/intersect/intersecting_bedpe_intervals.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1170">
@@ -598,10 +599,20 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/filter/filter_ref_sites_vcf.py">
+    <entry file="file://$PROJECT_DIR$/gridss/fix_gridss_header.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="198">
-          <caret line="11" column="0" lean-forward="false" selection-start-line="11" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
+        <state relative-caret-position="648">
+          <caret line="38" column="34" lean-forward="false" selection-start-line="38" selection-start-column="34" selection-end-line="38" selection-end-column="34" />
+          <folding>
+            <element signature="e#68#83#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../../hecaton/scripts/convert/vcf_to_table.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="648">
+          <caret line="90" column="24" lean-forward="true" selection-start-line="90" selection-start-column="24" selection-end-line="90" selection-end-column="74" />
           <folding />
         </state>
       </provider>
@@ -616,16 +627,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/gridss/fix_gridss_header.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="648">
-          <caret line="38" column="34" lean-forward="false" selection-start-line="38" selection-start-column="34" selection-end-line="38" selection-end-column="34" />
-          <folding>
-            <element signature="e#68#83#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/convert/vcf_to_bedpe.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="108">
@@ -634,22 +635,30 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/convert/vcf_to_table.py">
+    <entry file="file://$PROJECT_DIR$/genotype/merge_vcf_files.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1602">
-          <caret line="152" column="78" lean-forward="false" selection-start-line="152" selection-start-column="78" selection-end-line="152" selection-end-column="78" />
+        <state relative-caret-position="251">
+          <caret line="78" column="20" lean-forward="false" selection-start-line="78" selection-start-column="20" selection-end-line="78" selection-end-column="20" />
           <folding>
-            <element signature="e#108#123#0" expanded="true" />
+            <element signature="e#132#147#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/genotype/merge_vcf_files.py">
+    <entry file="file://$PROJECT_DIR$/filter/filter_ref_sites_vcf.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="521">
-          <caret line="102" column="34" lean-forward="true" selection-start-line="102" selection-start-column="34" selection-end-line="102" selection-end-column="34" />
+        <state relative-caret-position="162">
+          <caret line="11" column="0" lean-forward="false" selection-start-line="11" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/convert/vcf_to_table.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="380">
+          <caret line="80" column="28" lean-forward="true" selection-start-line="80" selection-start-column="28" selection-end-line="80" selection-end-column="28" />
           <folding>
-            <element signature="e#132#147#0" expanded="true" />
+            <element signature="e#108#123#0" expanded="true" />
           </folding>
         </state>
       </provider>

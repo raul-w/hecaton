@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Option in merge_vcf_files.py to merge VCF files of different samples without genotyping based on read depth computed by duphold
 - Option in vcf_to_table.py to calculate number of deletions that are supported by a change in read depth compared to 1000 bp flanking regions
 
+### Fixed
+- FILTER field is now correctly processed in vcf_to_table.py
+
 ## [0.3.0] - 2019-12-16
 ### Added
 - Script to easily filter Hecaton output (nextflow/hecaton_filter_size_cutoff.nf)

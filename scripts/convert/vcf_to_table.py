@@ -90,7 +90,7 @@ def vcf_to_table(input_fn, output_fn, fields=None, genotype_fields=None):
                     elif field == "QUAL":
                         record_fields.append(str(record.qual))
                     elif field == "FILTER":
-                        record_fields.append(str(record.filter))
+                        record_fields.append(str(record.filter.keys()[0]))
                     elif field == "END":
                         record_fields.append(str(record.stop))
                     elif field == "HOM-VAR":
