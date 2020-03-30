@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Option in merge_vcf_files.py to merge VCF files of different samples without genotyping based on read depth computed by duphold
 - Option in vcf_to_table.py to calculate number of deletions that are supported by a change in read depth compared to 1000 bp flanking regions
+- Option in vcf_to_table.py to generate, for each variant, a list of identifiers of samples that had a non-reference call
+- Option in vcf_to_table.py to generate ID field of each variant
 
 ### Fixed
 - FILTER field is now correctly processed in vcf_to_table.py

@@ -47,7 +47,7 @@ def vcf_to_table(input_fn, output_fn, fields=None, genotype_fields=None):
         samples = list(vcf.header.samples)
         samples.sort()
         header_fields = []
-        standard_fields = ["CHROM", "POS", "REF", "ALT", "QUAL", "FILTER", "END", "HOM-VAR", "VAR", "DEL_SUPPORTED"]
+        standard_fields = ["CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "END", "HOM-VAR", "VAR", "SAMPLES-VAR", "DEL_SUPPORTED"]
         standard_fields.extend(vcf.header.info)
         if fields:
             for field in fields:
@@ -79,6 +79,8 @@ def vcf_to_table(input_fn, output_fn, fields=None, genotype_fields=None):
                         record_fields.append(str(record.chrom))
                     elif field == "POS":
                         record_fields.append(str(record.pos))
+                    elif field == "ID":
+                        record_fields.append(str(record.id))
                     elif field == "REF":
                         record_fields.append(str(record.ref))
                     elif field == "ALT":
@@ -118,12 +120,25 @@ def vcf_to_table(input_fn, output_fn, fields=None, genotype_fields=None):
                                 if genotype not in non_variants:
                                     var_calls += 1
                             record_fields.append(str(var_calls))
+                    elif field == "SAMPLES-VAR":
+                        # get list of samples that contain a non-ref variant
+                        samples_var = []
+                        # compute total number of variant calls
+                        if "GT" not in record.format:
+                            logging.warning("GT not in format, SAMPLES-VAR will be NA")
+                            record_fields.append("NA")
+                        else:
+                            for sample in samples:
+                                genotype = record.samples[sample]["GT"]
+                                non_variants = [(0, 0), (None, None), (None, 0)]
+                                if genotype not in non_variants:
+                                    samples_var.append(sample)
+                            record_fields.append(str(samples_var))
                     elif field == "DEL_SUPPORTED":
                         del_supported_calls = 0
                         del_unsupported_calls = 0
                         nondel_supported_calls = 0
                         nondel_unsupported_calls = 0
-
                         if record.info["SVTYPE"] != "DEL":
                             record_fields.extend(["NA", "NA", "NA", "NA"])
                         else:
