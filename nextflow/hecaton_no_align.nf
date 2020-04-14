@@ -24,7 +24,7 @@ params.help = false
 def helpMessage() {
     log.info"""
     =========================================
-     Hecaton v0.3.0
+     Hecaton v0.4.0
     =========================================
     Usage:
     nextflow run hecaton --genome_file reference.fa --bwa_bams "*.bam" --manta_config configManta_weight_1.py.ini --model_file model_file.pkl --output_dir results

@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Option in vcf_to_table.py to generate, for each variant, a list of identifiers of samples that had a non-reference call
 - Option in vcf_to_table.py to generate ID field of each variant
 
+### Changed
+- Specified conda channels in requirements.yml files to improve reproducibility
+
 ### Fixed
 - FILTER field is now correctly processed in vcf_to_table.py
 - Nextflow binary now has read permissions in the Docker image, so that it can be used by non-root users
