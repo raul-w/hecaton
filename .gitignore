@@ -3,3 +3,5 @@ tests/test_del.csv
 tests/genome_rearranged.fasta
 test_wd/
 test_wd_docker/
+scripts/classes/__pycache__/
+scripts/utils/__pycache__/
