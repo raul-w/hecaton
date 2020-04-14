@@ -2,4 +2,4 @@
 
 set -euo pipefail
 
-docker build -t hecaton:v0.3.0 .
+docker build -t hecaton:v0.4.0 .
