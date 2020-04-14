@@ -25,6 +25,7 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-4.5.11-Linux-x86
 
 # Install Nextflow
 RUN wget -qO- https://get.nextflow.io | bash && \
+	chmod 755 nextflow && \
 	mv nextflow /usr/bin/
 
 # Install GRIDSS and Picard
@@ -37,14 +38,6 @@ ENV GRIDSS_JAR $PWD/gridss-2.0.1-gridss-jar-with-dependencies.jar
 # Set path to Picard jar file
 ENV PICARD $PWD/picard.jar
 
-# RUN wget https://github.com/hall-lab/speedseq/archive/v0.1.2.tar.gz && \
-# 	tar -xvf v0.1.2.tar.gz && \
-# 	rm v0.1.2.tar.gz && \
-# 	cd speedseq-0.1.2 && \
-# 	make align && \
-# 	make sv && \
-# 	cd ..
-
 # Set path to Conda
 ENV PATH /opt/conda/bin:$PATH 
 
@@ -55,7 +48,7 @@ RUN conda env create -f /environment_py3.yml && \
 	conda env create -f /environment_py2.yml && \
 	conda clean -a
 
-# Install Speedseq (work in progress)
+# Install Speedseq
 SHELL ["/bin/bash", "-c"]
 
 RUN source activate hecaton_py2 && \
@@ -71,7 +64,7 @@ RUN source activate hecaton_py2 && \
 # RUN git clone https://git.wur.nl/wijfj001/hecaton.git && cd hecaton && \
 #	git checkout e85bba0c && cd .. && \
 RUN git clone https://git.wur.nl/bioinformatics/hecaton.git && \
-	echo "2dbd6875" && \
+	echo "f82885e8" && \
 	chmod +x hecaton/scripts/collapse/* && \
 	chmod +x hecaton/scripts/convert/* && \
 	chmod +x hecaton/scripts/filter/* && \
