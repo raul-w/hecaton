@@ -57,7 +57,7 @@ def filter_ref_sites(input_fn, min_samples, output_fn):
                     if genotype not in non_variants:
                         var_calls += 1
             # write record to output if it has variant calls
-            if var_calls > min_samples:
+            if var_calls >= min_samples:
                 output_file.write(str(record))
     return 0
 

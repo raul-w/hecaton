@@ -1,3 +1,4 @@
+#!/usr/bin/env nextflow
 /*
  *Run the filtering on size and quality score step of Hecaton
  *

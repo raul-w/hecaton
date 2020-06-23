@@ -38,15 +38,18 @@ def parse_cl_args(in_args):
     parser.add_argument("-r", "--reciprocal", type=float, default=0.5,
                         help="Minimum fraction of reciprocal overlap needed "
                              "to collapse calls")
-    parser.add_argument("-he", "--heterozygous", default=False, action='store_true',
-                        help="If set, all heterozygous calls will be considered homozygous.")
-    parser.add_argument("-nge", "--no_genotyping", default=True, action='store_false',
-                        help="If set, calls will not be genotyped based on read depth "
+    parser.add_argument("-he", "--heterozygous", type=bool, default=True,
+                        help="If set to False, all heterozygous calls will be considered homozygous.")
+    parser.add_argument("-ge", "--genotyping", type=bool, default=True, 
+                        help="If set to False, calls will not be genotyped based on read depth "
                              "computations made by duphold.")
+    parser.add_argument("-fl", "--flanking", type=bool, default=False,
+                        help="If set to True, calls will be genotyped based on read depth "
+                             "relative to 1000 bp flanking regions, instead of read depth relative to the rest of the chromosome.")
     args = parser.parse_args(in_args)
     return args
 
-def obtain_sites_and_genotypes(input_fns, heterozygous=True, genotyping=True):
+def obtain_sites_and_genotypes(input_fns, heterozygous=True, genotyping=True, flanking=False):
     """
     Obtain all CNV sites from a list of VCF files
 
@@ -55,6 +58,9 @@ def obtain_sites_and_genotypes(input_fns, heterozygous=True, genotyping=True):
     into heterozygous or homozygous. All calls will be homozygous if false.
     :param genotyping: Boolean indicating whether calls will be genotyped
     based on read depth computed by duphold.
+    :param flanking: Boolean indicating whether calls will be genotyped based
+    on read depth relative to 1000 bp flanking regions (True) or read depth
+    relative to the rest of the chromosome
     :return: Set containing all sites. Sites are tuples
     (chrom, pos, alt, end, sv_type, inschrom, inspos). Dict containing sites
     as keys and genotype lines of samples as values.
@@ -65,9 +71,11 @@ def obtain_sites_and_genotypes(input_fns, heterozygous=True, genotyping=True):
     samples_dict = {}
     for input_vcf_fn in input_fns:
         with pysam.VariantFile(input_vcf_fn) as vcf:
-            # add new sample to sample dict
-            sample = vcf.header.samples[0]
-            samples_dict[sample] = defaultdict(int)
+            # add new samples to sample dict
+            for sample in vcf.header.samples:
+                if sample not in samples_dict:
+                    samples_dict[sample] = defaultdict(int)
+            number_samples = len(vcf.header.samples)
             for record in vcf.fetch():
                 # get site information
                 chrom = record.chrom
@@ -84,85 +92,92 @@ def obtain_sites_and_genotypes(input_fns, heterozygous=True, genotyping=True):
                     inspos = -1
                 site_tuple = (chrom, pos, alt, end, sv_type, inschrom, inspos)
                 sites_set.add(site_tuple)
-                # get genotype information
-                sup = str(record.samples[0]["SUP"])
-                rp = str(record.samples[0]["RP"])
-                sr = str(record.samples[0]["SR"])
-                tool = ""
-                if "TOOL" in record.format:
-                    tool = record.samples[0]["TOOL"]
-                    tool = ",".join(list(tool))
-                rq = str(round(record.samples[0]["RQ"], 2))
-                dhfc = record.samples[0]["DHFC"]
-                dhbfc = record.samples[0]["DHBFC"]
-                dhffc = record.samples[0]["DHFFC"]
-                # set genotypes based on format
-                gt = [".", "."]
-                non_calls = [(".", "."), (0, 0)]
-                called_gt = record.samples[0]["GT"]
-                if not genotyping:
-                    if called_gt[0] == None:
-                        gt[0] = "."
+                # get genotype information of each sample
+                for i in range(number_samples):
+                    sample_entry = record.samples[i]
+                    sample = vcf.header.samples[i]
+                    sup = str(sample_entry["SUP"])
+                    rp = str(sample_entry["RP"])
+                    sr = str(sample_entry["SR"])
+                    tool = ""
+                    if "TOOL" in record.format:
+                        tool = sample_entry["TOOL"]
+                        tool = ",".join(list(tool))
+                    rq = str(round(sample_entry["RQ"], 2))
+                    dhfc = sample_entry["DHFC"]
+                    dhbfc = sample_entry["DHBFC"]
+                    dhffc = sample_entry["DHFFC"]
+                    # set which type to genotype on
+                    if flanking:
+                        genotype_depth = dhffc
                     else:
-                        gt[0] = str(called_gt[0])
-                    if called_gt[1] == None:
-                        gt[1] = "."
+                        genotype_depth = dhfc
+                    # set genotypes based on format
+                    gt = [".", "."]
+                    non_calls = [(".", "."), (0, 0)]
+                    called_gt = sample_entry["GT"]
+                    if not genotyping:
+                        if called_gt[0] == None:
+                            gt[0] = "."
+                        else:
+                            gt[0] = str(called_gt[0])
+                        if called_gt[1] == None:
+                            gt[1] = "."
+                        else:
+                            gt[1] = str(called_gt[1])
                     else:
-                        gt[1] = str(called_gt[1])
-                else:
-                    if sv_type == "INS":
-                        # do not call INS if single sample shows reference only or no call
-                        if called_gt in non_calls:
-                            if called_gt[0] == None:
-                                gt[0] = "."
+                        if sv_type == "INS":
+                            # do not call INS if single sample shows reference only or no call
+                            if called_gt in non_calls:
+                                if called_gt[0] == None:
+                                    gt[0] = "."
+                                else:
+                                    gt[0] = str(called_gt[0])
+                                if called_gt[1] == None:
+                                    gt[1] = "."
+                                else:
+                                    gt[1] = str(called_gt[1])
                             else:
-                                gt[0] = str(called_gt[0])
-                            if called_gt[1] == None:
-                                gt[1] = "."
-                            else:
-                                gt[1] = str(called_gt[1])
-                        else: 
-                            # call can be only be ./1, based on available evidence
-                            gt[1] = "1"                        
-                    elif sv_type == "DEL":
-                        print("Wrong")
-                        if dhfc >= 0 and dhfc < 0.25:
-                            gt[0] = "1"
-                            gt[1] = "1"
-                        elif dhfc >= 0.25 and dhfc < 0.75:
-                            if not heterozygous:
+                                # call can be only be ./1, based on available evidence
+                                gt[1] = "1"
+                        elif sv_type == "DEL":
+                            if genotype_depth >= 0 and genotype_depth < 0.25:
                                 gt[0] = "1"
                                 gt[1] = "1"
+                            elif genotype_depth >= 0.25 and genotype_depth < 0.75:
+                                if not heterozygous:
+                                    gt[0] = "1"
+                                    gt[1] = "1"
+                                else:
+                                    gt[0] = "0"
+                                    gt[1] = "1"
                             else:
                                 gt[0] = "0"
-                                gt[1] = "1"
-                        else:
-                            gt[0] = "0"
-                            gt[1] = "0"
-                    elif sv_type == "DUP:TANDEM" or sv_type == "DUP:DISPERSED":
-                        if dhfc >= 0 and dhfc < 1.25:
-                            gt[0] = "0"
-                            gt[1] = "0"
-                        elif dhfc >= 1.25 and dhfc < 1.75:
-                            if not heterozygous:
+                                gt[1] = "0"
+                        elif sv_type == "DUP:TANDEM" or sv_type == "DUP:DISPERSED":
+                            if genotype_depth >= 0 and genotype_depth < 1.25:
+                                gt[0] = "0"
+                                gt[1] = "0"
+                            elif genotype_depth >= 1.25 and genotype_depth < 1.75:
+                                if not heterozygous:
+                                    gt[0] = "1"
+                                    gt[1] = "1"
+                                else:
+                                    gt[0] = "0"
+                                    gt[1] = "1"
+                            else:
                                 gt[0] = "1"
                                 gt[1] = "1"
-                            else:
-                                gt[0] = "0"
-                                gt[1] = "1"
                         else:
-                            gt[0] = "1"
-                            gt[1] = "1"
+                            raise ValueError("Cannot genotype unknown SV type: {}".format(sv_type))
+                    gt = "/".join(gt)
+                    # add genotype line to samples dict
+                    if tool:
+                        genotype_line = ":".join([gt, sup, rp, sr, tool, rq, str(dhfc), str(dhbfc), str(dhffc)])
                     else:
-                        raise ValueError("Cannot genotype unknown SV type: {}".format(sv_type))
-                gt = "/".join(gt)
-                # add genotype line to samples dict
-                if tool:
-                    genotype_line = ":".join([gt, sup, rp, sr, tool, rq, str(dhfc), str(dhbfc), str(dhffc)])
-                else:
-                    genotype_line = ":".join([gt, sup, rp, sr, rq, str(dhfc), str(dhbfc), str(dhffc)])
-                # add genotype information to samples dict
-                samples_dict[sample][site_tuple] = genotype_line
+                        genotype_line = ":".join([gt, sup, rp, sr, rq, str(dhfc), str(dhbfc), str(dhffc)])
+                    # add genotype information to samples dict
+                    samples_dict[sample][site_tuple] = genotype_line
     return sites_set, samples_dict
 
 def get_interval_tree_from_sites_set(sites_set, chrom_length_dict, reciprocal=0.5):
@@ -356,7 +371,7 @@ def write_to_output_vcf(output_vcf_fn, chrom_length_dict, sites_interval_trees, 
     # produce VCF header
     sample_names = sorted(list(samples_dict.keys()))
     sample_names_header = "\t".join(sample_names)
-    vcf_header_elems = ["##fileformat=VCFv4.3",
+    vcf_header_elems = ["##fileformat=VCFv4.2",
                         "##fileDate={}".format(datetime.date.today().strftime("%Y%m%d")),
                         "##INFO=<ID=SVTYPE,Number=1,Type=String,Description=\"Type of structural variant\">",
                         "##INFO=<ID=END,Number=.,Type=Integer,Description=\"End position of the variant described in this region\">",
@@ -427,7 +442,8 @@ def write_to_output_vcf(output_vcf_fn, chrom_length_dict, sites_interval_trees, 
             output_vcf.write("\n")
     return 0
 
-def merge_vcfs(input_fn, output_vcf_fn, chrom_length_dict, reciprocal=0.5, heterozygous=True, genotyping=True):
+def merge_vcfs(input_fn, output_vcf_fn, chrom_length_dict, reciprocal=0.5,
+               heterozygous=True, genotyping=True, flanking=False):
     """
     Merge VCF files of single samples containing CNVs called by Hecaton,
     producing a single VCF file containing the merged calls
@@ -435,11 +451,14 @@ def merge_vcfs(input_fn, output_vcf_fn, chrom_length_dict, reciprocal=0.5, heter
     :param output_vcf_fn: File containing path to VCF file
     :param chrom_length_dict: Dictionary with chromosomes as keys and
     length of chromosomes as values
+    :param reciprocal: Minimum reciprocal overlap required to collapse CNVs
     :param heterozygous: Boolean indicating whether calls will be classified
     into heterozygous or homozygous. All calls will be homozygous if false.
     :param genotyping: Boolean indicating whether calls will be genotyped
     based on read depth computed by duphold.
-    :param reciprocal: Minimum reciprocal overlap required to collapse CNVs
+    :param flanking: Boolean indicating whether calls will be genotyped based
+    on read depth relative to 1000 bp flanking regions (True) or read depth
+    relative to the rest of the chromosome
     :return: 0 (integer)
     """
     # get vcf filenames from input file
@@ -448,7 +467,9 @@ def merge_vcfs(input_fn, output_vcf_fn, chrom_length_dict, reciprocal=0.5, heter
         for line in input_file:
             input_fns.append(line.strip())
     # obtain all sites and genotype information
-    sites_set, samples_dict = obtain_sites_and_genotypes(input_fns, heterozygous, genotyping)
+    sites_set, samples_dict = obtain_sites_and_genotypes(input_fns,
+                                                         heterozygous,
+                                                         genotyping, flanking)
     # get interval tree in which sites considered to be the same CNV are collapsed
     sites_interval_tree = get_interval_tree_from_sites_set(sites_set,
                                                            chrom_length_dict,
@@ -472,7 +493,8 @@ def main():
         raise ValueError("Reciprocal overlap must be between 0 and 1")
     # merge vcf files
     merge_vcfs(args.input_file, args.output_vcf, chrom_length_dict,
-               args.reciprocal, args.heterozygous, args.no_genotyping)
+               args.reciprocal, args.heterozygous, args.genotyping,
+               args.flanking)
 
 if __name__ == "__main__":
     main()

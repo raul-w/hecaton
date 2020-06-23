@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+- Option in merge_vcf_files.py to merge VCF files containing multiple samples per file
+
 ## [0.4.0] - 2020-04-14
 ### Added
 - Option in merge_vcf_files.py to merge VCF files of different samples without genotyping based on read depth computed by duphold
