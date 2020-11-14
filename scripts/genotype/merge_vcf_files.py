@@ -8,6 +8,7 @@ one merged VCF file
 import argparse
 import datetime
 import operator
+import math
 import pysam
 import sys
 from collections import defaultdict
@@ -46,10 +47,16 @@ def parse_cl_args(in_args):
     parser.add_argument("-fl", "--flanking", type=bool, default=False,
                         help="If set to True, calls will be genotyped based on read depth "
                              "relative to 1000 bp flanking regions, instead of read depth relative to the rest of the chromosome.")
+    parser.add_argument("-dec", "--deletion_cutoff", type=float, default=0.7,
+                        help="Read depth threshold below which deletions will be genotyped (default = 0.7)")
+    parser.add_argument("-duc", "--duplication_cutoff", type=float, default=1.3,
+                        help="Read depth threshold above which duplications will be genotyped (default = 1.3)")
+    parser.add_argument("-sf", "--svtyper_formatting", type=bool, default=False,
+                        help="If set to True, tandeom duplication will get DUP as SVTYPE, instead of DUP:TANDEM, so they can be genotyped by svtyper")
     args = parser.parse_args(in_args)
     return args
 
-def obtain_sites_and_genotypes(input_fns, heterozygous=True, genotyping=True, flanking=False):
+def obtain_sites_and_genotypes(input_fns, heterozygous=True, genotyping=True, flanking=False, del_cutoff=0.7, dup_cutoff=1.3):
     """
     Obtain all CNV sites from a list of VCF files
 
@@ -61,6 +68,8 @@ def obtain_sites_and_genotypes(input_fns, heterozygous=True, genotyping=True, fl
     :param flanking: Boolean indicating whether calls will be genotyped based
     on read depth relative to 1000 bp flanking regions (True) or read depth
     relative to the rest of the chromosome
+    :param del_cutoff: Read depth threshold below which deletions will be genotyped
+    :param dup_cutoff: Read depth threshold above which duplications will be genotyped
     :return: Set containing all sites. Sites are tuples
     (chrom, pos, alt, end, sv_type, inschrom, inspos). Dict containing sites
     as keys and genotype lines of samples as values.
@@ -109,9 +118,9 @@ def obtain_sites_and_genotypes(input_fns, heterozygous=True, genotyping=True, fl
                     dhffc = sample_entry["DHFFC"]
                     # set which type to genotype on
                     if flanking:
-                        genotype_depth = dhffc
+                        genotype_depth = float(dhffc)
                     else:
-                        genotype_depth = dhfc
+                        genotype_depth = float(dhfc)
                     # set genotypes based on format
                     gt = [".", "."]
                     non_calls = [(".", "."), (0, 0)]
@@ -141,10 +150,14 @@ def obtain_sites_and_genotypes(input_fns, heterozygous=True, genotyping=True, fl
                                 # call can be only be ./1, based on available evidence
                                 gt[1] = "1"
                         elif sv_type == "DEL":
-                            if genotype_depth >= 0 and genotype_depth < 0.25:
+                            if genotype_depth > 4 or genotype_depth == float("inf") or math.isnan(genotype_depth):
+                                # very repetitive or no reads in flanks, cannot be trusted
+                                gt[0] = "."
+                                gt[1] = "."
+                            elif genotype_depth >= 0 and genotype_depth < 0.25:
                                 gt[0] = "1"
                                 gt[1] = "1"
-                            elif genotype_depth >= 0.25 and genotype_depth < 0.75:
+                            elif genotype_depth >= 0.25 and genotype_depth <= del_cutoff:
                                 if not heterozygous:
                                     gt[0] = "1"
                                     gt[1] = "1"
@@ -155,10 +168,14 @@ def obtain_sites_and_genotypes(input_fns, heterozygous=True, genotyping=True, fl
                                 gt[0] = "0"
                                 gt[1] = "0"
                         elif sv_type == "DUP:TANDEM" or sv_type == "DUP:DISPERSED":
-                            if genotype_depth >= 0 and genotype_depth < 1.25:
+                            if genotype_depth > 4 or genotype_depth == float("inf") or math.isnan(genotype_depth):
+                                # very repetitive or no reads in flanks, cannot be trusted
+                                gt[0] = "."
+                                gt[1] = "."
+                            elif genotype_depth >= 0 and genotype_depth < dup_cutoff:
                                 gt[0] = "0"
                                 gt[1] = "0"
-                            elif genotype_depth >= 1.25 and genotype_depth < 1.75:
+                            elif genotype_depth >= dup_cutoff and genotype_depth <= 1.75:
                                 if not heterozygous:
                                     gt[0] = "1"
                                     gt[1] = "1"
@@ -342,7 +359,7 @@ def get_interval_tree_from_sites_set(sites_set, chrom_length_dict, reciprocal=0.
                 sites_interval_trees[chrom].addi(new_site[1] - 1, new_site[3], new_site_dict)
     return sites_interval_trees
 
-def write_to_output_vcf(output_vcf_fn, chrom_length_dict, sites_interval_trees, samples_dict):
+def write_to_output_vcf(output_vcf_fn, chrom_length_dict, sites_interval_trees, samples_dict, svtyper_formatting=False):
     """
     Produce a VCF file containing all CNV sites and all genotypes of all samples
 
@@ -356,6 +373,8 @@ def write_to_output_vcf(output_vcf_fn, chrom_length_dict, sites_interval_trees, 
     (chrom, pos, alt, end, sv_type, inschrom, inspos).
     :param samples_dict: Dict containing sites as keys and genotype lines of
     samples as values.
+    :param svtyper_formatting: If set to True, tandem duplication will get DUP
+    as SVTYPE, instead of DUP:TANDEM, so they can be genotyped by svtyper.
     :return: 0 (integer)
     """
     # create identifier generator for sites
@@ -377,7 +396,12 @@ def write_to_output_vcf(output_vcf_fn, chrom_length_dict, sites_interval_trees, 
                         "##INFO=<ID=END,Number=.,Type=Integer,Description=\"End position of the variant described in this region\">",
                         "##INFO=<ID=INSCHROM,Number=.,Type=String,Description=\"Chromosome on which insertion site of the dispersed duplication is located\">",
                         "##INFO=<ID=INSPOS,Number=.,Type=Integer,Description=\"Position of insertion site of the dispersed duplication\">",
+                        "##INFO=<ID=CIPOS,Number=2,Type=Integer,Description=\"Confidence interval around POS for imprecise variants\">",
+                        "##INFO=<ID=CIEND,Number=2,Type=Integer,Description=\"Confidence interval around END for imprecise variants\">",
+                        "##INFO=<ID=CIPOS95,Number=2,Type=Integer,Description=\"Confidence interval (95%) around POS for imprecise variants\">",
+                        "##INFO=<ID=CIEND95,Number=2,Type=Integer,Description=\"Confidence interval (95%) around END for imprecise variants\">",
                         "##ALT=<ID=DEL,Description=\"Deletion\">",
+                        "##ALT=<ID=DUP,Description=\"Duplication\">",
                         "##ALT=<ID=DUP:DISPERSED,Description=\"Dispersed Duplication\">",
                         "##ALT=<ID=DUP:TANDEM,Description=\"Tandem Duplication\">",
                         "##ALT=<ID=INS,Description=\"Insertion of novel sequence\">",
@@ -410,6 +434,9 @@ def write_to_output_vcf(output_vcf_fn, chrom_length_dict, sites_interval_trees, 
             identifier = str(next(sites_identifiers))
             alt = collapsed_site[2]
             sv_type = collapsed_site[4]
+            if svtyper_formatting:
+                if sv_type == "DUP:TANDEM":
+                    sv_type = "DUP"
             type_info_field = "SVTYPE={}".format(sv_type)
             info_field_elems = [type_info_field, ]
             if sv_type != "INS":
@@ -421,6 +448,15 @@ def write_to_output_vcf(output_vcf_fn, chrom_length_dict, sites_interval_trees, 
                 info_field_elems.append(ins_chrom)
                 ins_pos = "INSPOS={}".format(str(collapsed_site[6]))
                 info_field_elems.append(ins_pos)
+            # add dummy confidence interval values
+            cipos_elem = "CIPOS=-10,10"
+            info_field_elems.append(cipos_elem)
+            ciend_elem = "CIEND=-10,10"
+            info_field_elems.append(ciend_elem)
+            cipos_95_elem = "CIPOS95=-10,10"
+            info_field_elems.append(cipos_95_elem)
+            ciend_95_elem = "CIEND95=-10,10"
+            info_field_elems.append(ciend_95_elem)
             info_field = ";".join(info_field_elems)
             format_field = "GT:SUP:RP:SR:TOOL:RQ:DHFC:DHBFC:DHFFC"
             variant_line_elems = [chrom, pos, identifier, ref, alt, qual,
@@ -443,7 +479,7 @@ def write_to_output_vcf(output_vcf_fn, chrom_length_dict, sites_interval_trees, 
     return 0
 
 def merge_vcfs(input_fn, output_vcf_fn, chrom_length_dict, reciprocal=0.5,
-               heterozygous=True, genotyping=True, flanking=False):
+               heterozygous=True, genotyping=True, flanking=False, del_cutoff=0.7, dup_cutoff=1.3, svtyper_formatting=False):
     """
     Merge VCF files of single samples containing CNVs called by Hecaton,
     producing a single VCF file containing the merged calls
@@ -459,6 +495,11 @@ def merge_vcfs(input_fn, output_vcf_fn, chrom_length_dict, reciprocal=0.5,
     :param flanking: Boolean indicating whether calls will be genotyped based
     on read depth relative to 1000 bp flanking regions (True) or read depth
     relative to the rest of the chromosome
+    :param del_cutoff: Read depth threshold below which deletions will be genotyped
+    :param dup_cutoff: Read depth threshold above which deletions will be genotyped
+    :param svtyper_formatting: Boolean indicating whether calls will be genotyped based
+    on read depth relative to 1000 bp flanking regions (True) or read depth
+    relative to the rest of the chromosome
     :return: 0 (integer)
     """
     # get vcf filenames from input file
@@ -469,13 +510,13 @@ def merge_vcfs(input_fn, output_vcf_fn, chrom_length_dict, reciprocal=0.5,
     # obtain all sites and genotype information
     sites_set, samples_dict = obtain_sites_and_genotypes(input_fns,
                                                          heterozygous,
-                                                         genotyping, flanking)
+                                                         genotyping, flanking, del_cutoff, dup_cutoff)
     # get interval tree in which sites considered to be the same CNV are collapsed
     sites_interval_tree = get_interval_tree_from_sites_set(sites_set,
                                                            chrom_length_dict,
                                                            reciprocal)
     # write sites and genotypes to output vcf
-    write_to_output_vcf(output_vcf_fn, chrom_length_dict, sites_interval_tree, samples_dict)
+    write_to_output_vcf(output_vcf_fn, chrom_length_dict, sites_interval_tree, samples_dict, svtyper_formatting)
     return 0
 
 def main():
@@ -494,7 +535,8 @@ def main():
     # merge vcf files
     merge_vcfs(args.input_file, args.output_vcf, chrom_length_dict,
                args.reciprocal, args.heterozygous, args.genotyping,
-               args.flanking)
+               args.flanking, args.deletion_cutoff, args.duplication_cutoff,
+               args.svtyper_formatting)
 
 if __name__ == "__main__":
     main()

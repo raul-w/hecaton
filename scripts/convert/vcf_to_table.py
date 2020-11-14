@@ -132,7 +132,7 @@ def vcf_to_table(input_fn, output_fn, fields=None, genotype_fields=None):
                                 genotype = record.samples[sample]["GT"]
                                 non_variants = [(0, 0), (None, None), (None, 0)]
                                 if genotype not in non_variants:
-                                    samples_var.append(sample)
+                                    samples_var.append((sample, genotype))
                             record_fields.append(str(samples_var))
                     elif field == "DEL_SUPPORTED":
                         del_supported_calls = 0

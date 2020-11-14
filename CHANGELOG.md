@@ -6,8 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Changed
+- merge_vcf_files.py now sets genotypes with a DHFFC of Inf, Nan, or higher than 4 to missing
+- vcf_to_table.py now writes both samples and genotypes into the SAMPLES-VAR column, as opposed to samples only
+
 ### Added
-- Option in merge_vcf_files.py to merge VCF files containing multiple samples per file
+- Option to merge_vcf_files.py to merge VCF files containing multiple samples per file, 
+- Option to merge_vcf_files.py to specify read depth cutoffs for calling deletions and duplications
+- Option to merge_vcf_files.py to generate output that can be processed by [svtyper](https://github.com/hall-lab/svtyper)
+- Nextflow scripts to convert output BEDPEs to VCFs and add read depth information to each call using duphold (script heavily inspired by [methylseq](https://github.com/nf-core/methylseq))
 
 ## [0.4.0] - 2020-04-14
 ### Added

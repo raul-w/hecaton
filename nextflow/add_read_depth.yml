@@ -1,0 +1,13 @@
+# This file can be used to create a conda environment for this pipeline:
+# conda env create -f environment.yml
+name: read_depth
+channels:
+  - bioconda
+  - defaults
+dependencies:
+  # python
+  - conda-forge::python=3.6
+  # utils
+  - conda-forge::pandas=0.23.4
+  # cnv calling
+  - bioconda::duphold=0.2.1
