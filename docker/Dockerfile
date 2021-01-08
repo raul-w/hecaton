@@ -8,7 +8,7 @@ CMD ["/sbin/my_init"]
 
 # Install basic applications
 RUN apt-get update && \
-	apt-get install -y curl gcc g++ wget git unzip tar gzip bzip2 xz-utils pigz make zlib1g-dev libncurses5-dev openjdk-8-jdk ant ca-certificates ca-certificates-java && \
+	apt-get install -y curl gcc g++ wget git unzip tar gzip bzip2 xz-utils pigz make zlib1g-dev libncurses5-dev openjdk-8-jdk ant ca-certificates ca-certificates-java bsdmainutils && \
 	apt-get clean && \
 	update-ca-certificates -f && \
 	rm -rf /var/lib/apt/lists/* && \ 
@@ -64,7 +64,7 @@ RUN source activate hecaton_py2 && \
 # RUN git clone https://git.wur.nl/wijfj001/hecaton.git && cd hecaton && \
 #	git checkout e85bba0c && cd .. && \
 RUN git clone https://git.wur.nl/bioinformatics/hecaton.git && \
-	echo "f82885e8" && \
+	echo "aeb7ff36" && \
 	chmod +x hecaton/scripts/collapse/* && \
 	chmod +x hecaton/scripts/convert/* && \
 	chmod +x hecaton/scripts/filter/* && \

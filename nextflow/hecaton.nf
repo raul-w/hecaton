@@ -5,7 +5,7 @@
  *@authors
  *Raúl Wijfjes <raul.wijfjes@wur.nl>
  *
- *Date last modified: 16-12-2019
+ *Date last modified: 08-01-2021
  */
 
 params.genome_file = ""
@@ -25,7 +25,7 @@ params.help = false
 def helpMessage() {
     log.info"""
     =========================================
-     Hecaton v0.4.0
+     Hecaton v0.5.0
     =========================================
     Usage:
     nextflow run hecaton --genome_file reference.fa --reads "prefix_{1,2}.fastq" --manta_config configManta_weight_1.py.ini --model_file model_file.pkl --output_dir results
