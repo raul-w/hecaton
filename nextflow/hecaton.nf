@@ -25,7 +25,7 @@ params.help = false
 def helpMessage() {
     log.info"""
     =========================================
-     Hecaton v0.5.0
+     Hecaton v0.5.1
     =========================================
     Usage:
     nextflow run hecaton --genome_file reference.fa --reads "prefix_{1,2}.fastq" --manta_config configManta_weight_1.py.ini --model_file model_file.pkl --output_dir results

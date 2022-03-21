@@ -57,7 +57,7 @@ else
 	echo "Converting VCF to table test successful"
 fi
 
-filter_ref_sites_vcf.py -v ../tests/genotyping/test_filter_ref_input.vcf -n 0 -o test_filter_ref_output.vcf
+filter_ref_sites_vcf.py -v ../tests/genotyping/test_filter_ref_input.vcf -n 1 -o test_filter_ref_output.vcf
 
 cmp test_filter_ref_output.vcf ../tests/genotyping/test_filter_ref_expected_output.vcf
 if [ $? -ne 0 ] 

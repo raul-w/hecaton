@@ -53,6 +53,7 @@ def filter_ref_sites(input_fn, min_samples, output_fn):
             else:
                 for sample in samples:
                     genotype = record.samples[sample]["GT"]
+                    print(genotype)
                     non_variants = [(0, 0), (None, None), (None, 0)]
                     if genotype not in non_variants:
                         var_calls += 1
