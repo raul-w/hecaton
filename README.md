@@ -11,6 +11,7 @@ Hecaton is a framework specifically designed for plant genomes that detects copy
   - [Docker](#docker)
 - [Usage](#usage)
   - [General usage](#general-usage)
+  - [Output files](#output)
   - [Running multiple samples at once](#multiple)
   - [Balancing sensitivity and precision](#sensitivity-precision)
   - [Applying Hecaton to low quality reference genomes or samples distantly related to the reference](#complex_genomes)
@@ -178,7 +179,7 @@ The following parameters need to be specified when running Hecaton:
 * `--reads`: Glob pattern specifying the location of a set of paired-end reads in FASTQ format. Hecaton can work with gzipped FASTQ files as input, avoiding the need to decompress read data. 
 * `--manta_config`: Config file that will be passed to the Manta tool. Can be found in `docker`.
 * `--output_dir`: Output directory to which all results will be written
-* `--model_file`: Random forest model that will be used to filter reads. Models can be found in the `models` directory of the Hecaton repository. 
+* `--model_file`: Random forest model that will be used to filter CNVs. Models can be found in the `models` directory of the Hecaton repository. 
 
 The other parameters are optional:
 * `-w`:the working directory to which intermediate results will be written (`work` by default). If an instance of Hecaton fails mid-run, it can be resumed from the point of failure by adding the `-resume` parameter to the command, assuming that the command is run in the directory in which the working directory is present:
@@ -187,6 +188,13 @@ nextflow run -c nextflow/nextflow.config -w hecaton_workdir nextflow/hecaton.nf 
 ```
 
 * `-c`: indicates a config file specifying the number of CPU cores and memory that will be assigned to Hecaton. The default `nextflow/nextflow.config` file assigns a maximum of 16 cores and 32 GB of RAM to Hecaton. This config file can be tuned to fit a specific computational setup. See the [Nextflow manual][nextflow_man] for additional details about generating a config file. As an example, the `nextflow/nextflow_slurm.config` can be used to run Hecaton on a HPC with Slurm (queue stills needs to be specified in this file).    
+
+### <a name="output"></a>Output files
+
+Output files can be found in the `random_forest_calls` folder in the specified output directory and are named as follows. 
+* `{prefix_of_read_files}_probabilities_unfiltered.bedpe`: Merged and post-processed set of CNVs, without having undergone filtering through the random forest model 
+* `{prefix_of_read_files}_probabilities_filtered_cutoff_0_7.bedpe`: Merged and post-processed set of CNVs, filtered through the random forest model. The default cutoff (0.7) can be changed to make Hecaton more sensitive or precise (see [Balancing sensitivity and precision](#sensitivity-precision) below) 
+* `{prefix_of_read_files}_probabilities_filtered_cutoff_0_7_flanking_Ns.bedpe`: Merged and post-processed set of CNVs, filtered through the random forest model, by read depth (computed by duphold), and by the presence of nearby gaps (only present if the `--extra_filtering` parameter was provided, see [Applying Hecaton to low quality reference genomes or samples distantly related to the reference](#complex_genomes) below)
 
 ### <a name="multiple"></a>Running multiple samples at once
 
