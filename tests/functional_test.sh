@@ -34,7 +34,7 @@ nextflow run -w functional_workdir_no_align -c ../nextflow/nextflow.config -resu
 	--output_dir test_no_align && \
 	echo "Functional test without doing alignments successful" && \
 
-source activate hecaton_py3 && \
+conda activate hecaton_py3 && \
 merge_vcf_files.py -i ../tests/genotyping/test_input.txt -f ../tests/genotyping/test.fa.fai -o test_output.vcf && \
 
 DIFF=$(diff test_output.vcf ../tests/genotyping/expected_output.vcf | wc -l)
@@ -68,4 +68,4 @@ else
 	echo "Filtering reference variants from VCF test successful"
 fi
 
-source deactivate
+conda deactivate

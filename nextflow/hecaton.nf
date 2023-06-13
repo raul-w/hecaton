@@ -5,7 +5,6 @@
  *@authors
  *Raúl Wijfjes <raul.wijfjes@wur.nl>
  *
- *Date last modified: 08-01-2021
  */
 
 params.genome_file = ""
@@ -25,7 +24,7 @@ params.help = false
 def helpMessage() {
     log.info"""
     =========================================
-     Hecaton v0.5.1
+     Hecaton v0.5.2
     =========================================
     Usage:
     nextflow run hecaton --genome_file reference.fa --reads "prefix_{1,2}.fastq" --manta_config configManta_weight_1.py.ini --model_file model_file.pkl --output_dir results
@@ -116,14 +115,14 @@ process align_reads {
 	script:
 	if( exclude_file.name == 'NO_EXCLUDE' ) 
 		"""
-		source activate hecaton_py3 && \
+		conda activate hecaton_py3 && \
 		speedseq align -t ${task.cpus} -o ${prefix} -R \"@RG\tID:${prefix}\tSM:${prefix}\tLB:${prefix}\" \
 		${genome_file} ${reads[0]} ${reads[1]} && \
-		source deactivate
+		conda deactivate
 		"""
 	else
 		"""
-		source activate hecaton_py3 && \
+		conda activate hecaton_py3 && \
 		speedseq align -t ${task.cpus} -o ${prefix} -R \"@RG\tID:${prefix}\tSM:${prefix}\tLB:${prefix}\" \
 		${genome_file} ${reads[0]} ${reads[1]} && \
 		samtools view -h -b -L ${exclude_file} ${prefix}.bam > ${prefix}_excluded.bam && \
@@ -138,7 +137,7 @@ process align_reads {
 		samtools index ${prefix}.splitters_excluded.bam && \
 		mv ${prefix}.splitters_excluded.bam ${prefix}.splitters.bam && \
 		mv ${prefix}.splitters_excluded.bam.bai ${prefix}.splitters.bam.bai && \
-		source deactivate
+		conda deactivate
 		"""
 }
 
@@ -180,7 +179,7 @@ process call_lumpy {
 
 	script:
 	"""
-	source activate hecaton_py3 &&
+	conda activate hecaton_py3 &&
 	speedseq sv -t ${task.cpus} -o ${prefix} \
 	-x ${genome_N_file} \
 	-B ${alignment_file} \
@@ -199,7 +198,7 @@ process call_lumpy {
 	-b ${prefix}_post_processed.bedpe \
 	-f ${genome_index_file} \
 	-o ${prefix}_post_processed_collapsed.bedpe
-	source deactivate
+	conda deactivate
 	"""
 }
 
@@ -227,7 +226,7 @@ process call_delly {
 
 	script:
 	"""
-	source activate hecaton_py3
+	conda activate hecaton_py3
 	delly call -g ${genome_file} -o ${prefix}_delly_cnvs.bcf ${alignment_file} &&
 	bcftools view ${prefix}_delly_cnvs.bcf > ${prefix}_delly_cnvs.vcf &&
 	bgzip -f ${prefix}_delly_cnvs.vcf &&
@@ -244,7 +243,7 @@ process call_delly {
 	-b ${prefix}_post_processed.bedpe \
 	-f ${genome_index_file} \
 	-o ${prefix}_post_processed_collapsed.bedpe
-	source deactivate
+	conda deactivate
 	"""
 }
 
@@ -275,7 +274,7 @@ process call_gridss {
 
 	script:
 	"""
-	source activate hecaton_py3
+	conda activate hecaton_py3
 	java -ea -Xmx31g \
 	-Dreference_fasta=${genome_file} \
 	-Dsamjdk.create_index=true \
@@ -300,7 +299,7 @@ process call_gridss {
 	-b ${prefix}_post_processed.bedpe \
 	-f ${genome_index_file} \
 	-o ${prefix}_post_processed_collapsed.bedpe
-	source deactivate
+	conda deactivate
 	"""
 }
 
@@ -329,7 +328,7 @@ process call_manta {
 
 	script:
 	"""
-	source activate hecaton_py2
+	conda activate hecaton_py2
 	configManta.py --tumorBam ${alignment_file} \
 	--config ${manta_config_file} \
 	--referenceFasta ${genome_file} --runDir ${prefix}_rundir &&
@@ -338,8 +337,8 @@ process call_manta {
 	mv results/variants/tumorSV.vcf.gz ../${prefix}_tumorSV.vcf.gz &&
 	mv results/variants/tumorSV.vcf.gz.tbi ../${prefix}_tumorSV.vcf.gz.tbi &&
 	cd .. &&
-	source deactivate
-	source activate hecaton_py3
+	conda deactivate
+	conda activate hecaton_py3
 	vcf_to_bedpe.py -i ${prefix}_tumorSV.vcf.gz \
 	-o ${prefix}.bedpe -t Manta &&
 	process_simple_cnvs.py -i ${prefix}_tumorSV.vcf.gz \
@@ -352,7 +351,7 @@ process call_manta {
 	-b ${prefix}_post_processed.bedpe \
 	-f ${genome_index_file} \
 	-o ${prefix}_post_processed_collapsed.bedpe
-	source deactivate
+	conda deactivate
 	"""
 }
 
@@ -375,7 +374,7 @@ process intersecting_calls {
 
 	script:
 	"""
-	source activate hecaton_py3
+	conda activate hecaton_py3
 	intersecting_bedpe_intervals.py \
 	-a lumpy_file.bedpe \
 	-b manta_file.bedpe \
@@ -391,7 +390,7 @@ process intersecting_calls {
 	-b gridss_file.bedpe \
 	-f ${genome_index_file} \
 	-o ${prefix}_intersected.bedpe
-	source deactivate
+	conda deactivate
 	"""
 }
 
@@ -412,11 +411,11 @@ process prepare_features {
 
 	script:
 	"""
-	source activate hecaton_py3
+	conda activate hecaton_py3
 	intersect_bedpe_to_feature_bedpe.py -i ${intersection_file} \
 	-o ${prefix}_features.bedpe
 	split_feature_set_non_insertions.py -f ${prefix}_features.bedpe -i ${prefix}_insertion_features.bedpe -n ${prefix}_non_insertion_features.bedpe
-	source deactivate
+	conda deactivate
 	"""
 }
 
@@ -438,7 +437,7 @@ process apply_random_forest {
 
 	script:
 	"""
-	source activate hecaton_py3
+	conda activate hecaton_py3
 	predict_cnvs_model_insertions_probabilities.py \
 	-i ${insertion_file} \
     -m ${model_file} \
@@ -451,7 +450,7 @@ process apply_random_forest {
 	-i ${prefix}_insertion_probabilities.bedpe \
 	-n ${prefix}_non_insertion_probabilities.bedpe \
 	-o ${prefix}_probabilities_unfiltered.bedpe
-	source deactivate
+	conda deactivate
 	"""
 }
 
@@ -471,12 +470,12 @@ process filter_calls_cutoff {
 
 	script:
 	"""
-	source activate hecaton_py3
+	conda activate hecaton_py3
     filter_calls_by_query.py \
     -i ${probability_file} \
     -q \"SIZE >= 50 & PREDICTION_1 >= ${params.cutoff}\" \
     -o ${prefix}_probabilities_filtered_cutoff_${params.cutoff}.bedpe
-    source deactivate
+    conda deactivate
 	"""
 }
 
@@ -503,7 +502,7 @@ process filter_calls_median_depth {
 
 	script:
 	"""
-	source activate hecaton_py3
+	conda activate hecaton_py3
 	bedpe_to_vcf.py \
 	-i ${probability_file} \
 	-o ${prefix}.vcf \
@@ -521,7 +520,7 @@ process filter_calls_median_depth {
 	-i ${prefix}_probabilities_duphold.bedpe \
 	-q \"(Chrom_norm_depth < 4 & GC_norm_depth < 4 & Flank_norm_depth < 4) & ((Chrom_norm_depth < 0.7 & GC_norm_depth < 0.7 & Flank_norm_depth < 0.7 & TYPE == 'DEL') | (Chrom_norm_depth > 1.3 & GC_norm_depth > 1.3 & Flank_norm_depth > 1.3 & (TYPE == 'DUP:TANDEM' | TYPE == 'DUP:DISPERSED')) | TYPE == 'INS')\" \
 	-o ${prefix}_probabilities_filtered_cutoff_${params.cutoff}_depth.bedpe
-	source deactivate
+	conda deactivate
 	"""
 }
 
@@ -545,7 +544,7 @@ process filter_calls_flanking_Ns {
 
 	script:
 	"""
-	source activate hecaton_py3
+	conda activate hecaton_py3
 	breakpoint_slop.py -i ${probability_file} \
 	-o tmp_${prefix}_slop_200.bedpe -s 200 && \
 	bedtools flank -i tmp_${prefix}_slop_200.bedpe \
@@ -563,7 +562,7 @@ process filter_calls_flanking_Ns {
 	-i ${prefix}_probabilities_flanking_Ns.bedpe \
 	-q \"Flanking_Ns < 0.1\" \
 	-o ${prefix}_probabilities_filtered_cutoff_${params.cutoff}_depth_flanking_Ns.bedpe
-	source deactivate
+	conda deactivate
 	"""
 }
 

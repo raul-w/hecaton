@@ -46,9 +46,9 @@ Additional notes regarding hardware requirements:
 * **CPU**: Only 1 CPU core is required to run Hecaton, but more will generally decrease running time.
 * **I/O**: Hecaton may perform a large amount of reading and writing to disc, so increasing disc access speeds by using for instance a local cache can greatly improve running time. 
 
-All steps of Hecaton are run using the Nextflow workflow language, which can be obtained by running: 
+All steps of Hecaton are run using the Nextflow workflow language. A specific version of Nextflow is required, which can be obtained by running: 
 ```bash
-wget -qO- https://get.nextflow.io | bash
+wget https://github.com/nextflow-io/nextflow/releases/download/v22.10.0/nextflow
 ```
 
 In order to run Hecaton, the `nextflow` binary needs to be added to the $PATH environment variable (e.g. export PATH=$PATH:directory/to/nextflow).
@@ -57,7 +57,7 @@ Finally, the Hecaton scripts themselves need to be obtained and added to $PATH.
 
 Clone the repository to your directory of choice:
 ```bash
-git clone https://git.wur.nl/bioinformatics/hecaton.git
+git clone https://github.com/raul-w/hecaton.git
 ```
 
 Set permissions and add all scripts of Hecaton to $PATH:
@@ -66,7 +66,7 @@ cd hecaton
 chmod +x scripts/collapse/* && \
 chmod +x scripts/convert/* && \
 chmod +x scripts/filter/* && \
-chmod +x scripts/genotype/* && \  
+chmod +x scripts/genotype/* && \
 chmod +x scripts/gridss/* && \
 chmod +x scripts/intersect/* && \
 chmod +x scripts/predict/* && \

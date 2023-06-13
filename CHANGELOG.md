@@ -4,9 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [0.5.2] - 2023-06-13
 ### Changed
 - Added output section to README
+- Specified that Nextflow version 22.10.0 should be used, as newer versions do not support DSL 1
+- Replaced "source activate" and "source deactivate" by "conda activate" and "conda deactivate" respectively 
 
 ### Fixed
 - Updated Docker tags in tests
