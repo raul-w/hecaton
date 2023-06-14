@@ -40,6 +40,12 @@ sudo apt update
 sudo apt install libncurses5-dev
 ```
 
+If your shell has not set up to use `conda activate`, please do so by running the following command once:
+
+```bash
+conda init bash
+```
+
 Additional notes regarding hardware requirements:
 
 * **Memory**: The minimum memory requirements of Hecaton are at least 4 GB of memory per core.
@@ -82,12 +88,12 @@ The dependencies of Hecaton can be installed locally or obtained through a Docke
 After installing all the prerequisites, the following command can be used to do a quick local installation in which all dependencies are located in the directory of the Hecaton repository. Note that this script adds a few lines to `~/.bashrc`.
 
 ```bash
-bash install.sh
+bash -l install.sh
 ``` 
 
 The following command tests whether Hecaton was installed correctly. Please ensure that you have installed Nextflow before running it (see [Prerequisites](#prerequisites)).
 ```bash
-bash tests/functional_test.sh
+bash -l tests/functional_test.sh
 ```
 A complete overview of all installation commands is given below.
 

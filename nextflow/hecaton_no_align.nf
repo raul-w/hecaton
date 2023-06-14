@@ -5,7 +5,6 @@
  *@authors
  *Raúl Wijfjes <raul.wijfjes@wur.nl>
  *
- *Date last modified: 08-01-2021
  */
 
 params.genome_file = ""
